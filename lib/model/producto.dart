@@ -1,7 +1,7 @@
-class Producto {
-  int? id;
-  String? nombre;
-  double? precio;
+class Producto { // Renombrado de Product
+  final String id;
+  final String name;
+  final double price;
 
-  Producto({this.id, this.nombre, this.precio});
+  Producto({required this.id, required this.name, required this.price});
 }

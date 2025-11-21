@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:t4_1/view/homeView.dart';
-import 'package:t4_1/viewModel/homeViewModel.dart';
-
 void main() {
-final homeViewModel = HomeViewModel();
+  // Inicializamos el ViewModel principal y se lo pasamos a la aplicación
+  final homeViewModel = HomeViewModel();
   runApp(BarApp(homeViewModel: homeViewModel));
 }
 
@@ -22,13 +19,13 @@ class BarApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Pantalla principal
-      home: HomeView(viewModel: homeViewModel),
+      home: HomePage(viewModel: homeViewModel),
       
       // Definición de la ruta con nombre para el resumen
       routes: {
-        OrderSummaryView.routeName: (context) {
-          final order = ModalRoute.of(context)!.settings.arguments as Order;
-          return OrderSummaryView(order: order);
+        Resumen.routeName: (context) {
+          final order = ModalRoute.of(context)!.settings.arguments as Pedido;
+          return Resumen(order: order);
         },
       },
     );
