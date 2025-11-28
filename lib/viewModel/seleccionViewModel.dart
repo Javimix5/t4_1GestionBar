@@ -1,20 +1,29 @@
-class SeleccionViewModel extends ChangeNotifier { // Renombrado de SelectProductsViewModel
-  // Mapa para rastrear las cantidades seleccionadas. Key: Product ID, Value: Quantity
-  Map<String, int> _selectedQuantities = {};
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/producto.dart';
+import 'package:t4_1/model/productoPedido.dart';
 
-  final List<Producto> menu = HomeViewModel._allProducts;
 
-  // Obtiene la cantidad de un producto específico
+class SeleccionViewModel extends ChangeNotifier { 
+  final Map<String, int> _selectedQuantities = {};
+
+  final List<Producto> menu = [
+    Producto(id: "1", nombre: "Caña", precio: 1.5),
+    Producto(id: "2", nombre: "Pinta", precio: 3.0),
+    Producto(id: "3", nombre: "Vino Tinto", precio: 2.5),
+    Producto(id: "4", nombre: "Refresco", precio: 2.0),
+    Producto(id: "5", nombre: "Tapa Bravas", precio: 4.5),
+    Producto(id: "6", nombre: "Hamburguesa", precio: 8.0),
+    Producto(id: "7", nombre: "Café", precio: 1.2),
+  ];
+
   int getQuantity(String productId) => _selectedQuantities[productId] ?? 0;
 
-  // Incrementa la cantidad del producto
   void incrementQuantity(String productId) {
     int current = getQuantity(productId);
     _selectedQuantities[productId] = current + 1;
     notifyListeners();
   }
 
-  // Decrementa la cantidad del producto (mínimo 0)
   void decrementQuantity(String productId) {
     int current = getQuantity(productId);
     if (current > 0) {
@@ -23,7 +32,6 @@ class SeleccionViewModel extends ChangeNotifier { // Renombrado de SelectProduct
     }
   }
 
-  // Genera la lista final de OrderItem para devolver
   List<ProductoPedido> getSelectedItems() {
     return _selectedQuantities.entries
         .where((entry) => entry.value > 0)

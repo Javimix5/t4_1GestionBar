@@ -1,33 +1,34 @@
-class PedidoViewModel extends ChangeNotifier { // Renombrado de CreateOrderViewModel
-  String _tableName = '';
-  List<ProductoPedido> _selectedItems = [];
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/model/producto.dart';
 
-  String get tableName => _tableName;
-  List<ProductoPedido> get selectedItems => _selectedItems;
+class PedidoViewModel extends ChangeNotifier {
+  String mesa = "";
+  String? id; 
+  List<Producto> productosSeleccionados = [];
 
-  // Propiedad calculada: número total de productos
-  int get totalProducts => _selectedItems.fold(0, (sum, item) => sum + item.quantity);
-
-  // Propiedad calculada: precio total del pedido
-  double get totalPrice => _selectedItems.fold(0.0, (sum, item) => sum + item.total);
-
-  // Validación: verdadero si el nombre de la mesa/pedido no está vacío y hay productos seleccionados
-  bool get isValid => _tableName.isNotEmpty && _selectedItems.isNotEmpty;
-
-  // Actualiza el nombre de la mesa/pedido
-  void updateTableName(String name) {
-    _tableName = name.trim();
+  void setMesa(String nombre) {
+    mesa = nombre;
     notifyListeners();
   }
 
-  // Actualiza la lista de productos seleccionados
-  void updateSelectedItems(List<ProductoPedido> items) {
-    _selectedItems = items;
+  void setId(String newId) {
+    id = newId;
+  }
+
+  void actualizarProductos(List<Producto> nuevosProductos) {
+    productosSeleccionados = nuevosProductos;
     notifyListeners();
   }
 
-  // Genera el objeto Order completo para devolver a la pantalla Home
-  Pedido generateOrder() {
-    return Pedido.fromItems(_tableName, _selectedItems);
+  double get total => productosSeleccionados.fold(0, (sum, item) => sum + (item.precio * item.cantidad));
+
+  bool esValido() {
+    return mesa.isNotEmpty && productosSeleccionados.isNotEmpty;
+  }
+  
+  Pedido generarPedido() {
+    final idToUse = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    return Pedido(id: idToUse, mesa: mesa, productos: productosSeleccionados);
   }
 }

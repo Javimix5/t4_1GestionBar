@@ -1,9 +1,10 @@
-class ProductoPedido { // Renombrado de OrderItem
+import 'package:t4_1/model/producto.dart';
+
+class ProductoPedido { 
   final Producto product;
   int quantity;
 
   ProductoPedido({required this.product, required this.quantity});
 
-  // Calcula el precio total de este artículo
-  double get total => product.price * quantity;
+  double get total => product.precio * quantity;
 }

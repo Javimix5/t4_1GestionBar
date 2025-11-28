@@ -1,80 +1,98 @@
-class Resumen extends StatelessWidget { // Renombrado de OrderSummaryView
-  static const routeName = '/resumen';
-  final Pedido order;
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/pedido.dart';
 
-  const Resumen({super.key, required this.order});
+
+class Resumen extends StatelessWidget {
+  const Resumen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final Pedido? pedido = ModalRoute.of(context)!.settings.arguments as Pedido?;
+
+    if (pedido == null) {
+      return const Scaffold(body: Center(child: Text("Error: No hay datos")));
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Resumen del Pedido', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueGrey,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text("Resumen Final"),
+        backgroundColor: Colors.orange, 
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/logoresumen.png',
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.08),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Mesa / Nombre: ${order.tableName}',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.blueGrey.shade700),
-                ),
-                const Divider(height: 30, thickness: 2),
-                Text(
-                  'Detalle de Productos:',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 10),
-                ...order.items.map((item) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text('${item.quantity}x ${item.product.name}')),
-                          Text('€${item.total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    )).toList(),
-                const Divider(height: 30, thickness: 2),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total de Productos:', style: TextStyle(fontSize: 16)),
-                    Text('${order.totalProducts}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
+                Text("MESA: ${pedido.mesa}", style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total Final:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text('€${order.totalPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-                  ],
+                // Línea fija tipo ticket con nombre del bar
+                Center(
+                  child: Column(
+                    children: const [
+                      Text('Bar Vader', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      SizedBox(height: 4),
+                      Divider(thickness: 1),
+                      Text('Únete al Lado Oscuro.....tenemos Happy Hour', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14))
+                    ],
+                  ),
                 ),
+                const Divider(),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: pedido.productos.length,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final prod = pedido.productos[index];
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("${prod.cantidad} x ${prod.nombre}"),
+                          Text("${(prod.precio * prod.cantidad).toStringAsFixed(2)} €"),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                const Divider(thickness: 2),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("TOTAL A PAGAR:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text(
+                        "${pedido.total.toStringAsFixed(2)} €",
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.indigo),
+                      ),
+                    ],
+                  ),
+                ),
+                Center(
+                  child: SizedBox(
+                    width: 140,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Volver a edición"),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
-        ),
-      ),
-      // Solo pop para volver a la pantalla de creación
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueGrey,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          child: const Text('Volver a Edición'),
-        ),
+        ],
       ),
     );
   }

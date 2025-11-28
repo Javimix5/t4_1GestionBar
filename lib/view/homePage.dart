@@ -1,119 +1,213 @@
-class HomePage extends StatefulWidget { // Renombrado de HomeView
-  final HomeViewModel viewModel;
-  const HomePage({super.key, required this.viewModel});
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/viewModel/homeViewModel.dart';
+import 'package:t4_1/view/hacerPedido.dart' as crear_pedido;
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Necesario para desuscribirse de ChangeNotifier
-  @override
-  void initState() {
-    super.initState();
-    widget.viewModel.addListener(_onViewModelChange);
-  }
+  final HomeViewModel _viewModel = HomeViewModel();
 
-  @override
-  void dispose() {
-    widget.viewModel.removeListener(_onViewModelChange);
-    super.dispose();
-  }
-
-  void _onViewModelChange() {
-    // Reconstruye la vista cuando el ViewModel notifica cambios (ej. se añade un pedido)
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  // Navegación a la pantalla de creación de pedido
-  Future<void> _createNewOrder() async {
-    final createViewModel = PedidoViewModel();
-    // Navegación imperativa con push, esperando el resultado (Pedido)
+  Future<void> _irACrearPedido([Pedido? pedido]) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HacerPedido(viewModel: createViewModel),
+        builder: (context) => crear_pedido.HacerPedido(pedido: pedido),
       ),
     );
 
-    // 1. Verificación de "mounted"
     if (!mounted) return;
 
-    if (result != null && result is Pedido) {
-      // 2. Si se devolvió un pedido (no se canceló), se añade a la lista
-      widget.viewModel.addOrder(result);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pedido "${result.tableName}" guardado con éxito.')),
-      );
+    if (result is Map && result['action'] == 'close') {
+      final id = result['id'] as String?;
+      final mesa = result['mesa'] as String?;
+      if (id != null) {
+        _viewModel.eliminarPedidoById(id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Mesa "${mesa ?? ''}" cerrada')),
+          );
+        }
+      }
+      return;
     }
-    // Si es null, el usuario canceló, no se hace nada.
+
+    if (result is Pedido) {
+      final normalizedNew = result.mesa.trim().toLowerCase();
+      final dupIdx = _viewModel.pedidos.indexWhere(
+        (p) => p.mesa.trim().toLowerCase() == normalizedNew,
+      );
+      if (dupIdx != -1 && _viewModel.pedidos[dupIdx].id != result.id) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ya existe una mesa con ese nombre o número'),
+            ),
+          );
+        }
+        return;
+      }
+
+      final existingIdx = _viewModel.pedidos.indexWhere(
+        (p) => p.id == result.id,
+      );
+      if (existingIdx != -1) {
+        _viewModel.actualizarPedidoById(result.id, result);
+      } else {
+        _viewModel.agregarPedido(result);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final orders = widget.viewModel.orders;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bar Dashboard', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueGrey.shade900,
-      ),
-      body: orders.isEmpty
-          ? const Center(child: Text('No hay pedidos activos.'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return Card(
-                  elevation: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blueGrey.shade200,
-                      child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey.shade900)),
+      appBar: AppBar(title: const Text("Pedidos del Bar")),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.08),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
+            ),
+          ),
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, child) {
+              if (_viewModel.pedidos.isEmpty) {
+                return const Align(
+                  // (0, -0.5) sitúa el texto horizontalmente al centro (0)
+                  // y verticalmente al 25% superior de la pantalla (-0.5),
+                  // dejando espacio libre al logo en el centro.
+                  alignment: Alignment(0, -0.8),
+                  child: Text(
+                    "No hay pedidos activos",
+                    style: TextStyle(
+                      fontSize: 20, // Hacemos el texto un poco más visible
+                      fontWeight: FontWeight.bold,
+                      color:
+                          Colors.black54, // Un color que contraste suavemente
                     ),
-                    title: Text(
-                      '${order.tableName}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    subtitle: Text(
-                      '${order.totalProducts} productos',
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                    trailing: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green.shade400),
-                      ),
-                      child: Text(
-                        '€${order.totalPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      // Opcional: ver detalles del pedido
-                    },
                   ),
                 );
-              },
-            ),
+              }
+              return ListView.builder(
+                itemCount: _viewModel.pedidos.length,
+                itemBuilder: (context, index) {
+                  final pedido = _viewModel.pedidos[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: ListTile(
+                      onTap: () => _irACrearPedido(pedido),
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.transparent,
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/empire.png',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Center(
+                              child: Text("${pedido.numeroProductos}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        pedido.mesa,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        "${pedido.numeroProductos} productos"
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "${pedido.total.toStringAsFixed(2)} €",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              textStyle: const TextStyle(fontSize: 14),
+                              minimumSize: const Size(0, 36),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
+                            child: const Text('Cerrar'),
+                            onPressed: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Cerrar mesa'),
+                                  content: Text(
+                                    '¿Confirmar cierre de la mesa "${pedido.mesa}"?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: const Text(
+                                        'Cerrar',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                _viewModel.eliminarPedidoById(pedido.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Mesa "${pedido.mesa}" cerrada',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _createNewOrder,
-        icon: const Icon(Icons.local_dining),
-        label: const Text('Nuevo Pedido'),
-        backgroundColor: Colors.blueGrey.shade700,
-        foregroundColor: Colors.white,
+        onPressed: _irACrearPedido,
+        label: const Text("Nuevo Pedido"),
+        icon: const Icon(Icons.add),
       ),
     );
   }

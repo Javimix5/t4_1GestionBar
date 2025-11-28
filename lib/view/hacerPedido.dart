@@ -1,230 +1,354 @@
-class HacerPedido extends StatefulWidget { // Renombrado de CreateOrderView
-  final PedidoViewModel viewModel;
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/producto.dart';
+import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/view/seleccionProductos.dart';
+import 'package:t4_1/viewModel/pedidoViewModel.dart';
 
-  const HacerPedido({super.key, required this.viewModel});
+class HacerPedido extends StatefulWidget {
+  final Pedido? pedido;
+
+  const HacerPedido({super.key, this.pedido});
 
   @override
   State<HacerPedido> createState() => _HacerPedidoState();
 }
 
 class _HacerPedidoState extends State<HacerPedido> {
-  final TextEditingController _nameController = TextEditingController();
-  late final SeleccionViewModel _selectProductsViewModel;
+  final PedidoViewModel _viewModel = PedidoViewModel();
+  final TextEditingController _mesaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Inicializa el ViewModel de selección de productos
-    _selectProductsViewModel = SeleccionViewModel();
-    // Escucha el ViewModel del pedido para reconstruir cuando cambie
-    widget.viewModel.addListener(_onViewModelChange);
-    // Inicializa el campo de texto con el valor actual del ViewModel
-    _nameController.text = widget.viewModel.tableName;
-    _nameController.addListener(() {
-      widget.viewModel.updateTableName(_nameController.text);
+    _mesaController.addListener(() {
+      _viewModel.setMesa(_mesaController.text);
     });
+    if (widget.pedido != null) {
+      _mesaController.text = widget.pedido!.mesa;
+      _viewModel.setMesa(widget.pedido!.mesa);
+      _viewModel.setId(widget.pedido!.id);
+      final copias = widget.pedido!.productos.map((p) => p.copy()).toList();
+      _viewModel.actualizarProductos(copias);
+    }
   }
 
   @override
   void dispose() {
-    widget.viewModel.removeListener(_onViewModelChange);
-    _nameController.dispose();
+    _mesaController.dispose();
     super.dispose();
   }
 
-  void _onViewModelChange() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  // Navegación a la selección de productos
-  Future<void> _navigateToProductSelection() async {
-    // Navegación imperativa con push, esperando el resultado (List<ProductoPedido>)
+  Future<void> _irASeleccionarProductos() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => SeleccionProductos(viewModel: _selectProductsViewModel),
-      ),
+      MaterialPageRoute(builder: (context) => SeleccionProductos(initialSelected: _viewModel.productosSeleccionados)),
     );
 
-    // 1. Verificación de "mounted"
     if (!mounted) return;
 
-    if (result != null && result is List<ProductoPedido>) {
-      // 2. Si se devolvieron datos, actualizar el ViewModel
-      widget.viewModel.updateSelectedItems(result);
-      // Opcionalmente, restablecer el ViewModel de selección para el próximo uso si fuera necesario,
-      // pero en este caso, se asume que cada pedido comienza con una nueva selección.
+    if (result is List<Producto>) {
+      _viewModel.actualizarProductos(result);
     }
-    // Si es null, el usuario canceló, no se hace nada.
   }
 
-  // Navegación al resumen final (ruta con nombre)
-  void _navigateToSummary() {
-    if (widget.viewModel.isValid) {
-      final orderPreview = widget.viewModel.generateOrder();
-      // Navegación con ruta con nombre (pushNamed)
-      Navigator.pushNamed(
+  void _eliminarProducto(String id) {
+    final nueva = List<Producto>.from(_viewModel.productosSeleccionados);
+    final prod = nueva.firstWhere((p) => p.id == id, orElse: () => Producto(id: '', nombre: '', precio: 0));
+    nueva.removeWhere((p) => p.id == id);
+    _viewModel.actualizarProductos(nueva);
+    if (mounted && prod.id.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Producto "${prod.nombre}" eliminado'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
+  void _decrementarProducto(String id) {
+    final idx = _viewModel.productosSeleccionados.indexWhere((p) => p.id == id);
+    if (idx == -1) return;
+    final nueva = List<Producto>.from(_viewModel.productosSeleccionados);
+    final prod = nueva[idx];
+    if (prod.cantidad > 1) {
+      prod.cantidad -= 1;
+      nueva[idx] = prod;
+    } else {
+      nueva.removeAt(idx);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Producto "${prod.nombre}" eliminado'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+    _viewModel.actualizarProductos(nueva);
+  }
+
+  void _incrementarProducto(String id) {
+    final idx = _viewModel.productosSeleccionados.indexWhere((p) => p.id == id);
+    if (idx == -1) return;
+    final nueva = List<Producto>.from(_viewModel.productosSeleccionados);
+    final prod = nueva[idx];
+    prod.cantidad += 1;
+    nueva[idx] = prod;
+    _viewModel.actualizarProductos(nueva);
+  }
+
+  void _verResumen() {
+    // Espera al retorno para asegurar que la ruta se restaura correctamente
+    () async {
+      await Navigator.pushNamed(
         context,
-        Resumen.routeName,
-        arguments: orderPreview,
+        '/resumen',
+        arguments: _viewModel.generarPedido(),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: El pedido debe tener un nombre/mesa y al menos un producto.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+      if (!mounted) return;
+    }();
   }
 
-  // Guardar y devolver el pedido
-  void _saveOrder() {
-    if (widget.viewModel.isValid) {
-      final completeOrder = widget.viewModel.generateOrder();
-      // pop(context, resultado) para devolver el pedido a Home
-      Navigator.pop(context, completeOrder);
-    } else {
-      // Validación: Muestra mensaje de error
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: Debes introducir un nombre/mesa y añadir productos para guardar.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Cancelar
-  void _cancelOrder() {
-    // pop(context) sin devolver resultado
-    Navigator.pop(context);
-  }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = widget.viewModel;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear Nuevo Pedido', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange.shade700,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Campo de texto para Mesa / Nombre
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Mesa o Nombre del Pedido',
-                hintText: 'Ej: Mesa 7',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                prefixIcon: const Icon(Icons.person_pin_circle),
-              ),
+      appBar: AppBar(title: Text(widget.pedido != null ? 'Editar Pedido' : 'Nuevo Pedido')),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.08),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 20),
-
-            // Botón para añadir productos
-            ElevatedButton.icon(
-              onPressed: _navigateToProductSelection,
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text('Añadir Productos a la Carta'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade400,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            // Resumen Provisional del Pedido
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Resumen Provisional',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.orange.shade700),
+          ),
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, _) {
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      controller: _mesaController,
+                      decoration: const InputDecoration(
+                        labelText: "Mesa / Identificador",
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.table_bar),
+                      ),
                     ),
-                    const Divider(),
-                    Text('Nombre: ${viewModel.tableName.isEmpty ? 'Sin Nombre' : viewModel.tableName}'),
-                    const SizedBox(height: 8),
-                    Text('Productos Seleccionados: ${viewModel.totalProducts}'),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Total Acumulado: €${viewModel.totalPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Expanded(
+                    child: _viewModel.productosSeleccionados.isEmpty
+                        ? const Align(
+                          alignment: Alignment(0, -1),
+                            child: Text(
+                              "Ningún producto seleccionado",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _viewModel.productosSeleccionados.length,
+                            itemBuilder: (context, index) {
+                              final prod = _viewModel.productosSeleccionados[index];
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  child: ListTile(
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.asset(
+                                        prod.image ?? '',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => CircleAvatar(child: Text(prod.nombre[0])),
+                                      ),
+                                    ),
+                                    title: Text(prod.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    subtitle: Text("${prod.precio} €"),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
+                                          iconSize: 20,
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _decrementarProducto(prod.id),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        SizedBox(
+                                          width: 36,
+                                          child: Center(
+                                            child: Text(
+                                              "${prod.cantidad}",
+                                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                          iconSize: 20,
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _eliminarProducto(prod.id),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        IconButton(
+                                          icon: const Icon(Icons.add_circle, color: Colors.green),
+                                          iconSize: 20,
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _incrementarProducto(prod.id),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "${(prod.precio * prod.cantidad).toStringAsFixed(2)} €",
+                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                            },
+                          ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    color: Colors.grey[200],
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("TOTAL PROVISIONAL:", style: TextStyle(fontSize: 16)),
+                            Text(
+                              "${_viewModel.total.toStringAsFixed(2)} €",
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 150,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 13), minimumSize: const Size(0, 36)),
+                                onPressed: _irASeleccionarProductos,
+                                child: const Text("Añadir Productos"),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 13), minimumSize: const Size(0, 36)),
+                                onPressed: _viewModel.productosSeleccionados.isNotEmpty ? _verResumen : null,
+                                child: const Text("Ver Resumen"),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    // Lista de productos seleccionados
-                    ...viewModel.selectedItems.map((item) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2.0),
-                          child: Text('${item.quantity}x ${item.product.name} (€${item.total.toStringAsFixed(2)})', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-                        )).toList(),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Botón para Ver Resumen (Navegación con ruta con nombre)
-            OutlinedButton.icon(
-              onPressed: viewModel.isValid ? _navigateToSummary : null,
-              icon: const Icon(Icons.receipt),
-              label: const Text('Ver Resumen Final'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                side: BorderSide(color: Colors.deepOrange.shade200),
-                foregroundColor: Colors.deepOrange,
-              ),
-            ),
-          ],
-        ),
+                  )
+                ],
+              );
+            },
+          ),
+        ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _cancelOrder,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  side: const BorderSide(color: Colors.grey),
+      bottomNavigationBar: SafeArea(
+          child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.pedido != null) ...[
+                SizedBox(
+                  width: 120,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      textStyle: const TextStyle(fontSize: 14),
+                      minimumSize: const Size(0, 36),
+                    ),
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Cerrar mesa'),
+                          content: const Text('¿Cerrar la mesa y eliminar el pedido?'),
+                          actions: [
+                            TextButton(
+                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), textStyle: const TextStyle(fontSize: 13)),
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), textStyle: const TextStyle(fontSize: 13)),
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Cerrar', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        Navigator.pop(context, {'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
+                      }
+                    },
+                    child: const Text('Cerrar mesa'),
+                  ),
                 ),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: viewModel.isValid ? _saveOrder : null,
-                icon: const Icon(Icons.save),
-                label: const Text('Guardar Pedido'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(width: 8),
+              ],
+              SizedBox(
+                width: 120,
+                child: TextButton(
+                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
+                  onPressed: () => Navigator.pop(context), 
+                  child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 140,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
+                  onPressed: _guardarPedido,
+                  child: const Text("Guardar Pedido"),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _guardarPedido() {
+    final pedido = _viewModel.generarPedido();
+    if ((pedido.mesa.isEmpty) || _viewModel.productosSeleccionados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rellena la mesa y añade productos antes de guardar'), duration: Duration(seconds: 1)),
+      );
+      return;
+    }
+
+    Navigator.pop(context, pedido);
   }
 }

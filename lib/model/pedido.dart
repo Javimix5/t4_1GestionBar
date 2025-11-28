@@ -1,29 +1,13 @@
-class Pedido { // Renombrado de Order
+import 'package:t4_1/model/producto.dart';
+
+class Pedido {
   final String id;
-  final String tableName;
-  final List<ProductoPedido> items;
-  final int totalProducts;
-  final double totalPrice;
+  final String mesa;
+  final List<Producto> productos;
 
-  Pedido({
-    required this.id,
-    required this.tableName,
-    required this.items,
-    required this.totalProducts,
-    required this.totalPrice,
-  });
+  Pedido({required this.id, required this.mesa, required this.productos});
 
-  // Método de utilidad para crear un pedido a partir de un nombre y una lista de items
-  static Pedido fromItems(String tableName, List<ProductoPedido> items) {
-    int totalProducts = items.fold(0, (sum, item) => sum + item.quantity);
-    double totalPrice = items.fold(0.0, (sum, item) => sum + item.total);
-
-    return Pedido(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      tableName: tableName,
-      items: items,
-      totalProducts: totalProducts,
-      totalPrice: totalPrice,
-    );
-  }
+  double get total => productos.fold(0, (sum, item) => sum + (item.precio * item.cantidad));
+  
+  int get numeroProductos => productos.fold(0, (sum, item) => sum + item.cantidad);
 }

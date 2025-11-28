@@ -1,132 +1,159 @@
-class SeleccionProductos extends StatefulWidget { // Renombrado de SelectProductsView
-  final SeleccionViewModel viewModel;
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/producto.dart';
 
-  const SeleccionProductos({super.key, required this.viewModel});
+class SeleccionProductos extends StatefulWidget {
+  final List<Producto>? initialSelected;
+
+  const SeleccionProductos({super.key, this.initialSelected});
 
   @override
   State<SeleccionProductos> createState() => _SeleccionProductosState();
 }
 
 class _SeleccionProductosState extends State<SeleccionProductos> {
-  // Necesario para desuscribirse de ChangeNotifier
+  final List<Producto> _carta = [
+    Producto(id: "1", nombre: "Caña", precio: 1.5, image: 'assets/images/cana.png'),
+    Producto(id: "2", nombre: "Pinta", precio: 3.0, image: 'assets/images/pinta.png'),
+    Producto(id: "3", nombre: "Vino Tinto", precio: 2.5, image: 'assets/images/vino.png'),
+    Producto(id: "4", nombre: "Refresco", precio: 2.0, image: 'assets/images/refresco.png'),
+    Producto(id: "5", nombre: "Tapa Bravas", precio: 4.5, image: 'assets/images/bravas.png'),
+    Producto(id: "6", nombre: "Hamburguesa", precio: 8.0, image: 'assets/images/hamburguesa.png'),
+    Producto(id: "7", nombre: "Café", precio: 1.2, image: 'assets/images/cafe.png'),
+  ];
+
+  final Map<int, int> _cantidades = {};
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.addListener(_onViewModelChange);
-  }
-
-  @override
-  void dispose() {
-    widget.viewModel.removeListener(_onViewModelChange);
-    super.dispose();
-  }
-
-  void _onViewModelChange() {
-    // Reconstruye la vista cuando el ViewModel notifica cambios
-    if (mounted) {
-      setState(() {});
+    if (widget.initialSelected != null && widget.initialSelected!.isNotEmpty) {
+      for (var sel in widget.initialSelected!) {
+        final idx = _carta.indexWhere((p) => p.id == sel.id);
+        if (idx != -1) {
+          _cantidades[idx] = sel.cantidad;
+        }
+      }
     }
   }
 
-  void _confirmSelection() {
-    // Devuelve la lista de ProductoPedido seleccionados
-    Navigator.pop(context, widget.viewModel.getSelectedItems());
+  void _incrementar(int index) {
+    setState(() {
+      _cantidades[index] = (_cantidades[index] ?? 0) + 1;
+    });
   }
 
-  void _cancelSelection() {
-    // Cierra la pantalla sin devolver datos
-    Navigator.pop(context);
+  void _decrementar(int index) {
+    setState(() {
+      int actual = _cantidades[index] ?? 0;
+      if (actual > 0) {
+        _cantidades[index] = actual - 1;
+      }
+    });
+  }
+
+  void _confirmar() {
+    List<Producto> seleccionados = [];
+    _cantidades.forEach((index, cantidad) {
+      if (cantidad > 0) {
+        var prod = _carta[index].copy();
+        prod.cantidad = cantidad;
+        seleccionados.add(prod);
+      }
+    });
+    Navigator.pop(context, seleccionados);
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = widget.viewModel;
-    final totalSelected = viewModel.getSelectedItems().length;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Selección de Productos', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.lightBlue.shade700,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: ListView.builder(
-        itemCount: viewModel.menu.length,
-        itemBuilder: (context, index) {
-          final product = viewModel.menu[index];
-          final quantity = viewModel.getQuantity(product.id);
-          final isSelected = quantity > 0;
-
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: isSelected ? 4 : 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: isSelected ? BorderSide(color: Colors.lightBlue.shade400, width: 2) : BorderSide.none,
+      appBar: AppBar(title: const Text("Seleccionar Productos")),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+              color: Colors.black.withOpacity(0.08),
+              colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
             ),
-            child: ListTile(
-              title: Text(product.name, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.lightBlue.shade800 : Colors.black87)),
-              subtitle: Text('€${product.price.toStringAsFixed(2)}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Botón para decrementar cantidad
-                  IconButton(
-                    icon: Icon(Icons.remove_circle_outline, color: quantity > 0 ? Colors.red : Colors.grey),
-                    onPressed: quantity > 0 ? () => viewModel.decrementQuantity(product.id) : null,
-                  ),
-                  // Muestra la cantidad actual
-                  SizedBox(
-                    width: 30,
-                    child: Text(
-                      '$quantity',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          ListView.builder(
+            itemCount: _carta.length,
+            itemBuilder: (context, index) {
+              final producto = _carta[index];
+              final cantidad = _cantidades[index] ?? 0;
+              return Card(
+                child: ListTile(
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      producto.image ?? '',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => CircleAvatar(child: Text(producto.nombre[0])),
                     ),
                   ),
-                  // Botón para incrementar cantidad
-                  IconButton(
-                    icon: Icon(Icons.add_circle_outline, color: Colors.lightBlue.shade700),
-                    onPressed: () => viewModel.incrementQuantity(product.id),
+                  title: Text(producto.nombre),
+                  subtitle: Text("${producto.precio} €"),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () => _decrementar(index),
+                        icon: const Icon(Icons.remove_circle_outline),
+                        iconSize: 20,
+                        padding: const EdgeInsets.all(6),
+                        constraints: const BoxConstraints(),
+                      ),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 36,
+                        child: Center(
+                          child: Text(
+                            "$cantidad",
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        onPressed: () => _incrementar(index),
+                        icon: const Icon(Icons.add_circle, color: Colors.blue),
+                        iconSize: 20,
+                        padding: const EdgeInsets.all(6),
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              onTap: () {
-                // Alternar selección o incrementar si no está seleccionado
-                if (quantity == 0) {
-                  viewModel.incrementQuantity(product.id);
-                }
-              },
-            ),
-          );
-        },
+                ),
+              );
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _cancelSelection,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  side: const BorderSide(color: Colors.red),
-                ),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
+            SizedBox(
+              width: 120,
+              child: TextButton(
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
               ),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: totalSelected > 0 ? _confirmSelection : null,
-                icon: const Icon(Icons.check, size: 20),
-                label: Text('Confirmar ($totalSelected items)'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+            SizedBox(
+              width: 140,
+              child: ElevatedButton(
+                // Usar mismo estilo que "Guardar Pedido" (sin fondo naranja)
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
+                onPressed: _confirmar,
+                child: const Text("Confirmar Selección"),
               ),
             ),
           ],

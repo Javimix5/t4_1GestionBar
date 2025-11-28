@@ -1,51 +1,55 @@
+import 'package:flutter/material.dart';
+import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/model/producto.dart';
+
 class HomeViewModel extends ChangeNotifier {
-  // Lista de pedidos actuales
-  List<Pedido> _orders = [];
-  List<Pedido> get orders => _orders;
+  List<Pedido> pedidos = [];
 
   HomeViewModel() {
-    _loadInitialOrders();
+    _cargarDatosIniciales();
   }
 
-  // Carga inicial de pedidos
-  void _loadInitialOrders() {
-    _orders = [
+  void _cargarDatosIniciales() {
+    // Añadir ejemplos iniciales de pedidos para cumplir el enunciado
+    pedidos = [
       Pedido(
-        id: '1',
-        tableName: 'Mesa 5',
-        items: [ProductoPedido(product: _allProducts[0], quantity: 2)],
-        totalProducts: 2,
-        totalPrice: _allProducts[0].price * 2,
+        id: 'p1',
+        mesa: 'Mesa 1',
+        productos: [
+          Producto(id: '1', nombre: 'Caña', precio: 1.5, cantidad: 2, image: 'assets/images/cana.png'),
+          Producto(id: '5', nombre: 'Tapa Bravas', precio: 4.5, cantidad: 1, image: 'assets/images/bravas.png'),
+        ],
       ),
       Pedido(
-        id: '2',
-        tableName: 'Encargo Juan',
-        items: [
-          ProductoPedido(product: _allProducts[2], quantity: 1),
-          ProductoPedido(product: _allProducts[5], quantity: 3),
+        id: 'p2',
+        mesa: 'Mesa 2',
+        productos: [
+          Producto(id: '2', nombre: 'Pinta', precio: 3.0, cantidad: 1, image: 'assets/images/pinta.png'),
+          Producto(id: '6', nombre: 'Hamburguesa', precio: 8.0, cantidad: 2, image: 'assets/images/hamburguesa.png'),
         ],
-        totalProducts: 4,
-        totalPrice: _allProducts[2].price * 1 + _allProducts[5].price * 3,
       ),
     ];
-    // Notifica a las Vistas que la lista ha cambiado
     notifyListeners();
   }
 
-  // Añade un nuevo pedido a la lista
-  void addOrder(Pedido newOrder) {
-    _orders.insert(0, newOrder);
+  void agregarPedido(Pedido pedido) {
+    pedidos.add(pedido);
     notifyListeners();
   }
 
-  // Menú completo de productos (datos simulados)
-  static final List<Producto> _allProducts = [
-    Producto(id: 'p1', name: 'Café Espresso', price: 1.50),
-    Producto(id: 'p2', name: 'Cerveza Lager (33cl)', price: 2.80),
-    Producto(id: 'p3', name: 'Vino Tinto (Copa)', price: 3.50),
-    Producto(id: 'p4', name: 'Refresco Cola', price: 2.50),
-    Producto(id: 'p5', name: 'Bocadillo Jamón', price: 4.90),
-    Producto(id: 'p6', name: 'Tarta de Queso', price: 3.95),
-    Producto(id: 'p7', name: 'Agua Mineral', price: 1.20),
-  ];
+  void actualizarPedidoById(String id, Pedido pedido) {
+    final idx = pedidos.indexWhere((p) => p.id == id);
+    if (idx != -1) {
+      pedidos[idx] = pedido;
+      notifyListeners();
+    }
+  }
+
+  void eliminarPedidoById(String id) {
+    final idx = pedidos.indexWhere((p) => p.id == id);
+    if (idx != -1) {
+      pedidos.removeAt(idx);
+      notifyListeners();
+    }
+  }
 }

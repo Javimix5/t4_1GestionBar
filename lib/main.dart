@@ -1,32 +1,22 @@
+import 'package:flutter/material.dart';
+import 'package:t4_1/view/homePage.dart';
+import 'package:t4_1/view/resumen.dart';
+
 void main() {
-  // Inicializamos el ViewModel principal y se lo pasamos a la aplicación
-  final homeViewModel = HomeViewModel();
-  runApp(BarApp(homeViewModel: homeViewModel));
+  runApp(const MyApp());
 }
 
-class BarApp extends StatelessWidget {
-  final HomeViewModel homeViewModel;
-  const BarApp({super.key, required this.homeViewModel});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bar Order App (MVVM)',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        useMaterial3: true,
-      ),
-      // Pantalla principal
-      home: HomePage(viewModel: homeViewModel),
-      
-      // Definición de la ruta con nombre para el resumen
+      title: 'Bar Vader',
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      home: const HomePage(),
       routes: {
-        Resumen.routeName: (context) {
-          final order = ModalRoute.of(context)!.settings.arguments as Pedido;
-          return Resumen(order: order);
-        },
+        '/resumen': (context) => const Resumen(),
       },
     );
   }
