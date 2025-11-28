@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Central ThemeData
   static ThemeData themeData() {
     return ThemeData(
       primarySwatch: Colors.indigo,
@@ -29,7 +28,6 @@ class AppTheme {
     );
   }
 
-  // Reusable ButtonStyles
   static ButtonStyle confirmButton(Color color) => ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -45,7 +43,6 @@ class AppTheme {
         minimumSize: const Size(0, 36),
       );
 
-  // Outlined style used for main actions that must look uniform
   static ButtonStyle actionOutlined({Color? fg}) => OutlinedButton.styleFrom(
         foregroundColor: fg,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -53,10 +50,8 @@ class AppTheme {
         minimumSize: const Size(0, 36),
       );
 
-  // Common SnackBar duration
   static const Duration snackBarDuration = Duration(seconds: 1);
 
-  // Background logo widget (semi-transparent)
   static Widget backgroundLogo({String asset = 'assets/images/logo.png', double opacity = 0.08}) {
     return Positioned.fill(
       child: Image.asset(

@@ -117,7 +117,6 @@ class _HacerPedidoState extends State<HacerPedido> {
       appBar: AppBar(title: Text(widget.pedido != null ? 'Editar Pedido' : 'Nuevo Pedido')),
       body: Stack(
         children: [
-          // Background logo from AppTheme
           AppTheme.backgroundLogo(),
           ListenableBuilder(
             listenable: _viewModel,
