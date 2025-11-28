@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/ui/app_theme.dart';
 
 
 class Resumen extends StatelessWidget {
@@ -20,15 +21,7 @@ class Resumen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/logoresumen.png',
-              fit: BoxFit.cover,
-              color: Color.fromRGBO(0,0,0,0.08),
-              colorBlendMode: BlendMode.darken,
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-            ),
-          ),
+          AppTheme.backgroundLogo(asset: 'assets/images/logoresumen.png'),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(

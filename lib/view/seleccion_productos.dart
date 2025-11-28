@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/producto.dart';
+import 'package:t4_1/ui/app_theme.dart';
 
 class SeleccionProductos extends StatefulWidget {
   final List<Producto>? initialSelected;
@@ -69,15 +70,7 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
       appBar: AppBar(title: const Text("Seleccionar Productos")),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.cover,
-              color: Color.fromRGBO(0,0,0,0.08),
-              colorBlendMode: BlendMode.darken,
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-            ),
-          ),
+          AppTheme.backgroundLogo(),
           ListView.builder(
             itemCount: _carta.length,
             itemBuilder: (context, index) {

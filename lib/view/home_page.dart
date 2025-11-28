@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/ui/app_theme.dart';
 import 'package:t4_1/viewModel/home_view_model.dart';
 import 'package:t4_1/view/hacer_pedido.dart' as crear_pedido;
 
@@ -70,16 +71,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: const Text("Pedidos del Bar")),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.cover,
-              color: Color.fromRGBO(0,0,0,0.08),
-              colorBlendMode: BlendMode.darken,
-              errorBuilder: (context, error, stackTrace) =>
-                  const SizedBox.shrink(),
-            ),
-          ),
+          AppTheme.backgroundLogo(),
           ListenableBuilder(
             listenable: _viewModel,
             builder: (context, child) {

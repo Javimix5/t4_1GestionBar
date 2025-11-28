@@ -3,6 +3,7 @@ import 'package:t4_1/model/producto.dart';
 import 'package:t4_1/model/pedido.dart';
 import 'package:t4_1/view/seleccion_productos.dart';
 import 'package:t4_1/viewModel/pedido_view_model.dart';
+import 'package:t4_1/ui/app_theme.dart';
 
 class HacerPedido extends StatefulWidget {
   final Pedido? pedido;
@@ -114,15 +115,8 @@ class _HacerPedidoState extends State<HacerPedido> {
       appBar: AppBar(title: Text(widget.pedido != null ? 'Editar Pedido' : 'Nuevo Pedido')),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.cover,
-              color: Color.fromRGBO(0,0,0,0.08),
-              colorBlendMode: BlendMode.darken,
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-            ),
-          ),
+          // Background logo from AppTheme
+          AppTheme.backgroundLogo(),
           ListenableBuilder(
             listenable: _viewModel,
             builder: (context, _) {
@@ -191,6 +185,14 @@ class _HacerPedidoState extends State<HacerPedido> {
                                             ),
                                           ),
                                         ),
+                                                                                const SizedBox(width: 6),
+                                        IconButton(
+                                          icon: const Icon(Icons.add_circle, color: Colors.green),
+                                          iconSize: 20,
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _incrementarProducto(prod.id),
+                                        ),
                                         const SizedBox(width: 6),
                                         IconButton(
                                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -199,18 +201,14 @@ class _HacerPedidoState extends State<HacerPedido> {
                                           constraints: const BoxConstraints(),
                                           onPressed: () => _eliminarProducto(prod.id),
                                         ),
-                                        const SizedBox(width: 6),
-                                        IconButton(
-                                          icon: const Icon(Icons.add_circle, color: Colors.green),
-                                          iconSize: 20,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () => _incrementarProducto(prod.id),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "${(prod.precio * prod.cantidad).toStringAsFixed(2)} €",
-                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                                        const SizedBox(width: 12),
+                                        SizedBox(
+                                          width: 88,
+                                          child: Text(
+                                            "${(prod.precio * prod.cantidad).toStringAsFixed(2)} €",
+                                            textAlign: TextAlign.right,
+                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                                          ),
                                         ),
                                       ],
                                     ),
