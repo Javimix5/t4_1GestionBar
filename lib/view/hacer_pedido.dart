@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/producto.dart';
 import 'package:t4_1/model/pedido.dart';
-import 'package:t4_1/view/seleccionProductos.dart';
-import 'package:t4_1/viewModel/pedidoViewModel.dart';
+import 'package:t4_1/view/seleccion_productos.dart';
+import 'package:t4_1/viewModel/pedido_view_model.dart';
 
 class HacerPedido extends StatefulWidget {
   final Pedido? pedido;
@@ -98,16 +98,13 @@ class _HacerPedidoState extends State<HacerPedido> {
     _viewModel.actualizarProductos(nueva);
   }
 
-  void _verResumen() {
-    // Espera al retorno para asegurar que la ruta se restaura correctamente
-    () async {
-      await Navigator.pushNamed(
-        context,
-        '/resumen',
-        arguments: _viewModel.generarPedido(),
-      );
-      if (!mounted) return;
-    }();
+  Future<void> _verResumen() async {
+    await Navigator.pushNamed(
+      context,
+      '/resumen',
+      arguments: _viewModel.generarPedido(),
+    );
+    if (!mounted) return;
   }
 
 
@@ -121,7 +118,7 @@ class _HacerPedidoState extends State<HacerPedido> {
             child: Image.asset(
               'assets/images/logo.png',
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.08),
+              color: Color.fromRGBO(0,0,0,0.08),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
             ),
@@ -287,6 +284,7 @@ class _HacerPedidoState extends State<HacerPedido> {
                       minimumSize: const Size(0, 36),
                     ),
                     onPressed: () async {
+                      final navigator = Navigator.of(context);
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -308,7 +306,7 @@ class _HacerPedidoState extends State<HacerPedido> {
                       );
 
                       if (confirm == true) {
-                        Navigator.pop(context, {'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
+                        navigator.pop({'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
                       }
                     },
                     child: const Text('Cerrar mesa'),

@@ -1,6 +1,6 @@
 import 'package:t4_1/model/producto.dart';
 
-class ProductoPedido { 
+class ProductoPedido {
   final Producto product;
   int quantity;
 

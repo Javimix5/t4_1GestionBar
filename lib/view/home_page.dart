@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/pedido.dart';
-import 'package:t4_1/viewModel/homeViewModel.dart';
-import 'package:t4_1/view/hacerPedido.dart' as crear_pedido;
+import 'package:t4_1/viewModel/home_view_model.dart';
+import 'package:t4_1/view/hacer_pedido.dart' as crear_pedido;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
             child: Image.asset(
               'assets/images/logo.png',
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.08),
+              color: Color.fromRGBO(0,0,0,0.08),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (context, error, stackTrace) =>
                   const SizedBox.shrink(),
@@ -85,17 +85,14 @@ class _HomePageState extends State<HomePage> {
             builder: (context, child) {
               if (_viewModel.pedidos.isEmpty) {
                 return const Align(
-                  // (0, -0.5) sitúa el texto horizontalmente al centro (0)
-                  // y verticalmente al 25% superior de la pantalla (-0.5),
-                  // dejando espacio libre al logo en el centro.
                   alignment: Alignment(0, -0.8),
                   child: Text(
                     "No hay pedidos activos",
                     style: TextStyle(
-                      fontSize: 20, // Hacemos el texto un poco más visible
+                      fontSize: 20, 
                       fontWeight: FontWeight.bold,
                       color:
-                          Colors.black54, // Un color que contraste suavemente
+                          Colors.black54, 
                     ),
                   ),
                 );
@@ -156,6 +153,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: const Text('Cerrar'),
                             onPressed: () async {
+                              final messenger = ScaffoldMessenger.of(context);
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
@@ -182,15 +180,13 @@ class _HomePageState extends State<HomePage> {
                               );
                               if (confirm == true) {
                                 _viewModel.eliminarPedidoById(pedido.id);
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Mesa "${pedido.mesa}" cerrada',
-                                      ),
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Mesa "${pedido.mesa}" cerrada',
                                     ),
-                                  );
-                                }
+                                  ),
+                                );
                               }
                             },
                           ),

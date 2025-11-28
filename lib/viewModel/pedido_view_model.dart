@@ -4,7 +4,7 @@ import 'package:t4_1/model/producto.dart';
 
 class PedidoViewModel extends ChangeNotifier {
   String mesa = "";
-  String? id; 
+  String? id;
   List<Producto> productosSeleccionados = [];
 
   void setMesa(String nombre) {

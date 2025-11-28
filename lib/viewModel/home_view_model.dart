@@ -10,7 +10,6 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void _cargarDatosIniciales() {
-    // Añadir ejemplos iniciales de pedidos para cumplir el enunciado
     pedidos = [
       Pedido(
         id: 'p1',

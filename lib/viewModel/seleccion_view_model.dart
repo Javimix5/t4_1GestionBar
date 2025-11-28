@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/producto.dart';
-import 'package:t4_1/model/productoPedido.dart';
+import 'package:t4_1/model/producto_pedido.dart';
 
 
 class SeleccionViewModel extends ChangeNotifier { 

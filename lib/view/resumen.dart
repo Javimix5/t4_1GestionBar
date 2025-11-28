@@ -24,7 +24,7 @@ class Resumen extends StatelessWidget {
             child: Image.asset(
               'assets/images/logoresumen.png',
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.08),
+              color: Color.fromRGBO(0,0,0,0.08),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
             ),
@@ -36,7 +36,6 @@ class Resumen extends StatelessWidget {
               children: [
                 Text("MESA: ${pedido.mesa}", style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                // Línea fija tipo ticket con nombre del bar
                 Center(
                   child: Column(
                     children: const [

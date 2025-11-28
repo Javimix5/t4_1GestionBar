@@ -73,7 +73,7 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
             child: Image.asset(
               'assets/images/logo.png',
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.08),
+              color: Color.fromRGBO(0,0,0,0.08),
               colorBlendMode: BlendMode.darken,
               errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
             ),
@@ -150,7 +150,6 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
             SizedBox(
               width: 140,
               child: ElevatedButton(
-                // Usar mismo estilo que "Guardar Pedido" (sin fondo naranja)
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
                 onPressed: _confirmar,
                 child: const Text("Confirmar Selección"),
