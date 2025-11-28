@@ -27,11 +27,14 @@ class _HomePageState extends State<HomePage> {
     if (result is Map && result['action'] == 'close') {
       final id = result['id'] as String?;
       final mesa = result['mesa'] as String?;
-      if (id != null) {
+        if (id != null) {
         _viewModel.eliminarPedidoById(id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Mesa "${mesa ?? ''}" cerrada')),
+            SnackBar(
+              content: Text('Mesa "${mesa ?? ''}" cerrada'),
+              duration: AppTheme.snackBarDuration,
+            ),
           );
         }
       }
@@ -48,6 +51,7 @@ class _HomePageState extends State<HomePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Ya existe una mesa con ese nombre o número'),
+              duration: AppTheme.snackBarDuration,
             ),
           );
         }
@@ -135,14 +139,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 12),
                           TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                              textStyle: const TextStyle(fontSize: 14),
-                              minimumSize: const Size(0, 36),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                            ),
+                            style: AppTheme.smallTextButton(bg: Colors.red, fg: Colors.white),
                             child: const Text('Cerrar'),
                             onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
@@ -172,13 +169,14 @@ class _HomePageState extends State<HomePage> {
                               );
                               if (confirm == true) {
                                 _viewModel.eliminarPedidoById(pedido.id);
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Mesa "${pedido.mesa}" cerrada',
-                                    ),
-                                  ),
-                                );
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Mesa "${pedido.mesa}" cerrada',
+                                          ),
+                                          duration: AppTheme.snackBarDuration,
+                                        ),
+                                      );
                               }
                             },
                           ),

@@ -71,16 +71,16 @@ class Resumen extends StatelessWidget {
                     ],
                   ),
                 ),
-                Center(
-                  child: SizedBox(
-                    width: 140,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Volver a edición"),
+                  Center(
+                    child: SizedBox(
+                      width: 140,
+                      child: OutlinedButton(
+                        style: AppTheme.actionOutlined(),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Volver a edición"),
+                      ),
                     ),
-                  ),
-                )
+                  )
               ],
             ),
           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/producto.dart';
 import 'package:t4_1/ui/app_theme.dart';
+import 'package:t4_1/components/widgets/product_list_item.dart';
+import 'package:t4_1/components/widgets/bottom_action_bar.dart';
 
 class SeleccionProductos extends StatefulWidget {
   final List<Producto>? initialSelected;
@@ -76,80 +78,36 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
             itemBuilder: (context, index) {
               final producto = _carta[index];
               final cantidad = _cantidades[index] ?? 0;
-              return Card(
-                child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.asset(
-                      producto.image ?? '',
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => CircleAvatar(child: Text(producto.nombre[0])),
-                    ),
-                  ),
-                  title: Text(producto.nombre),
-                  subtitle: Text("${producto.precio} €"),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () => _decrementar(index),
-                        icon: const Icon(Icons.remove_circle_outline),
-                        iconSize: 20,
-                        padding: const EdgeInsets.all(6),
-                        constraints: const BoxConstraints(),
-                      ),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 36,
-                        child: Center(
-                          child: Text(
-                            "$cantidad",
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      IconButton(
-                        onPressed: () => _incrementar(index),
-                        icon: const Icon(Icons.add_circle, color: Colors.blue),
-                        iconSize: 20,
-                        padding: const EdgeInsets.all(6),
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                ),
+              return ProductListItem(
+                producto: producto,
+                cantidad: cantidad,
+                onIncrement: () => _incrementar(index),
+                onDecrement: () => _decrementar(index),
+                showPrice: false,
               );
             },
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 120,
-              child: TextButton(
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
-              ),
+      bottomNavigationBar: BottomActionBar(
+        children: [
+          SizedBox(
+            width: 120,
+            child: TextButton(
+              style: AppTheme.smallTextButton(),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
             ),
-            const SizedBox(width: 10),
-            SizedBox(
-              width: 140,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
-                onPressed: _confirmar,
-                child: const Text("Confirmar Selección"),
-              ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 140,
+            child: OutlinedButton(
+              onPressed: _confirmar,
+              child: const Text("Confirmar Selección"),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -4,6 +4,8 @@ import 'package:t4_1/model/pedido.dart';
 import 'package:t4_1/view/seleccion_productos.dart';
 import 'package:t4_1/viewModel/pedido_view_model.dart';
 import 'package:t4_1/ui/app_theme.dart';
+import 'package:t4_1/components/widgets/product_list_item.dart';
+import 'package:t4_1/components/widgets/bottom_action_bar.dart';
 
 class HacerPedido extends StatefulWidget {
   final Pedido? pedido;
@@ -61,7 +63,7 @@ class _HacerPedidoState extends State<HacerPedido> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Producto "${prod.nombre}" eliminado'),
-          duration: const Duration(seconds: 1),
+          duration: AppTheme.snackBarDuration,
         ),
       );
     }
@@ -81,7 +83,7 @@ class _HacerPedidoState extends State<HacerPedido> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Producto "${prod.nombre}" eliminado'),
-            duration: const Duration(seconds: 1),
+            duration: AppTheme.snackBarDuration,
           ),
         );
       }
@@ -150,70 +152,13 @@ class _HacerPedidoState extends State<HacerPedido> {
                             itemCount: _viewModel.productosSeleccionados.length,
                             itemBuilder: (context, index) {
                               final prod = _viewModel.productosSeleccionados[index];
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  child: ListTile(
-                                    leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: Image.asset(
-                                        prod.image ?? '',
-                                        width: 48,
-                                        height: 48,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => CircleAvatar(child: Text(prod.nombre[0])),
-                                      ),
-                                    ),
-                                    title: Text(prod.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Text("${prod.precio} €"),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
-                                          iconSize: 20,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () => _decrementarProducto(prod.id),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        SizedBox(
-                                          width: 36,
-                                          child: Center(
-                                            child: Text(
-                                              "${prod.cantidad}",
-                                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        ),
-                                                                                const SizedBox(width: 6),
-                                        IconButton(
-                                          icon: const Icon(Icons.add_circle, color: Colors.green),
-                                          iconSize: 20,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () => _incrementarProducto(prod.id),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete, color: Colors.red),
-                                          iconSize: 20,
-                                          padding: const EdgeInsets.all(6),
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () => _eliminarProducto(prod.id),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        SizedBox(
-                                          width: 88,
-                                          child: Text(
-                                            "${(prod.precio * prod.cantidad).toStringAsFixed(2)} €",
-                                            textAlign: TextAlign.right,
-                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
+                              return ProductListItem(
+                                producto: prod,
+                                cantidad: prod.cantidad,
+                                onIncrement: () => _incrementarProducto(prod.id),
+                                onDecrement: () => _decrementarProducto(prod.id),
+                                onDelete: () => _eliminarProducto(prod.id),
+                              );
                             },
                           ),
                   ),
@@ -239,16 +184,16 @@ class _HacerPedidoState extends State<HacerPedido> {
                             SizedBox(
                               width: 150,
                               child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 13), minimumSize: const Size(0, 36)),
-                                onPressed: _irASeleccionarProductos,
-                                child: const Text("Añadir Productos"),
-                              ),
+                                  style: AppTheme.actionOutlined(),
+                                  onPressed: _irASeleccionarProductos,
+                                  child: const Text("Añadir Productos"),
+                                ),
                             ),
                             const SizedBox(width: 8),
                             SizedBox(
                               width: 150,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 13), minimumSize: const Size(0, 36)),
+                                style: AppTheme.confirmButton(Colors.orange),
                                 onPressed: _viewModel.productosSeleccionados.isNotEmpty ? _verResumen : null,
                                 child: const Text("Ver Resumen"),
                               ),
@@ -264,74 +209,60 @@ class _HacerPedidoState extends State<HacerPedido> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-          child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.pedido != null) ...[
-                SizedBox(
-                  width: 120,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      textStyle: const TextStyle(fontSize: 14),
-                      minimumSize: const Size(0, 36),
-                    ),
-                    onPressed: () async {
-                      final navigator = Navigator.of(context);
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Cerrar mesa'),
-                          content: const Text('¿Cerrar la mesa y eliminar el pedido?'),
-                          actions: [
-                            TextButton(
-                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), textStyle: const TextStyle(fontSize: 13)),
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancelar'),
-                            ),
-                            TextButton(
-                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), textStyle: const TextStyle(fontSize: 13)),
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Cerrar', style: TextStyle(color: Colors.red)),
-                            ),
-                          ],
+      bottomNavigationBar: BottomActionBar(
+        children: [
+          if (widget.pedido != null) ...[
+            SizedBox(
+              width: 120,
+              child: TextButton(
+                style: AppTheme.smallTextButton(bg: Colors.red, fg: Colors.white),
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Cerrar mesa'),
+                      content: const Text('¿Cerrar la mesa y eliminar el pedido?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancelar'),
                         ),
-                      );
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Cerrar', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
 
-                      if (confirm == true) {
-                        navigator.pop({'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
-                      }
-                    },
-                    child: const Text('Cerrar mesa'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              SizedBox(
-                width: 120,
-                child: TextButton(
-                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
-                  onPressed: () => Navigator.pop(context), 
-                  child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
-                ),
+                  if (confirm == true) {
+                    navigator.pop({'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
+                  }
+                },
+                child: const Text('Cerrar mesa'),
               ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 140,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8), textStyle: const TextStyle(fontSize: 14), minimumSize: const Size(0, 36)),
-                  onPressed: _guardarPedido,
-                  child: const Text("Guardar Pedido"),
-                ),
-              ),
-            ],
+            ),
+            const SizedBox(width: 8),
+          ],
+          SizedBox(
+            width: 120,
+            child: TextButton(
+              style: AppTheme.smallTextButton(),
+              onPressed: () => Navigator.pop(context), 
+              child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 140,
+            child: OutlinedButton(
+              style: AppTheme.actionOutlined(),
+              onPressed: _guardarPedido,
+              child: const Text("Guardar Pedido"),
+            ),
+          ),
+        ],
       ),
     );
   }

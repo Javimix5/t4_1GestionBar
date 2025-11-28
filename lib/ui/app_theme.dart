@@ -45,6 +45,14 @@ class AppTheme {
         minimumSize: const Size(0, 36),
       );
 
+  // Outlined style used for main actions that must look uniform
+  static ButtonStyle actionOutlined({Color? fg}) => OutlinedButton.styleFrom(
+        foregroundColor: fg,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        textStyle: const TextStyle(fontSize: 13),
+        minimumSize: const Size(0, 36),
+      );
+
   // Common SnackBar duration
   static const Duration snackBarDuration = Duration(seconds: 1);
 
