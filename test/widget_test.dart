@@ -11,20 +11,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:t4_1/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('App launches and opens Nuevo Pedido page', (WidgetTester tester) async {
+    // Build the app.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Home should show the app bar title
+    expect(find.text('Pedidos del Bar'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
+    // FAB with add icon should be present
+    expect(find.byIcon(Icons.add), findsOneWidget);
+
+    // Tap the FAB to open the Nuevo Pedido screen
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // New screen should show 'Nuevo Pedido' title and the mesa input
+    expect(find.text('Nuevo Pedido'), findsOneWidget);
+    expect(find.text('Mesa / Identificador'), findsOneWidget);
   });
 }
