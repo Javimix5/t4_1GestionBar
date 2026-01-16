@@ -1,4 +1,4 @@
-# t4_1 — Gestión de pedidos (Flutter)
+# t4_1 — GestionBar (Gestión de pedidos - Flutter)
 
 Descripción
 -----------
