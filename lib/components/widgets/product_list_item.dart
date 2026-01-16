@@ -69,6 +69,8 @@ class ProductListItem extends StatelessWidget {
               constraints: const BoxConstraints(),
               onPressed: onIncrement,
             ),
+
+            /// Valida si se proporciona el callback onDelete para mostrar el botón de eliminar.
             if (onDelete != null) ...[
               const SizedBox(width: 6),
               IconButton(
@@ -79,6 +81,8 @@ class ProductListItem extends StatelessWidget {
                 onPressed: onDelete,
               ),
             ],
+            
+            /// Valida si se debe mostrar el precio total basado en la cantidad seleccionada.
             if (showPrice) ...[
               const SizedBox(width: 12),
               SizedBox(

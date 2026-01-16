@@ -9,6 +9,8 @@ class AppTheme {
   static ThemeData themeData() {
     return ThemeData(
       primarySwatch: Colors.indigo,
+
+      /// Estilos para botones elevados.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -16,6 +18,8 @@ class AppTheme {
           minimumSize: const Size(0, 36),
         ),
       ),
+
+      /// Estilos para botones de texto.
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -23,6 +27,8 @@ class AppTheme {
           minimumSize: const Size(0, 36),
         ),
       ),
+
+      /// Estilos para botones outlined.
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),

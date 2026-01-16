@@ -37,6 +37,8 @@ class _HacerPedidoState extends State<HacerPedido> {
     _mesaController.addListener(() {
       _viewModel.setMesa(_mesaController.text);
     });
+
+    // Valida si se está editando un pedido existente para inicializar los datos.
     if (widget.pedido != null) {
       _mesaController.text = widget.pedido!.mesa;
       _viewModel.setMesa(widget.pedido!.mesa);
@@ -54,7 +56,6 @@ class _HacerPedidoState extends State<HacerPedido> {
   }
 
   /// Navega a la pantalla de selección de productos y actualiza la lista de productos seleccionados al regresar.
-  /// Valida que el estado del widget aún está montado antes de actualizar.
   Future<void> _irASeleccionarProductos() async {
     final result = await Navigator.push(
       context,
@@ -65,6 +66,7 @@ class _HacerPedidoState extends State<HacerPedido> {
       ),
     );
 
+    /// Valida el resultado de la navegación y actualiza los productos seleccionados en consecuencia.
     if (!mounted) return;
 
     if (result is List<Producto>) {
@@ -138,6 +140,7 @@ class _HacerPedidoState extends State<HacerPedido> {
   }
 
   /// Construye la interfaz de usuario de la pantalla HacerPedido.
+  /// 
   /// Incluye un campo de texto para la mesa, una lista de productos seleccionados,
   /// un total provisional y botones para añadir productos, ver el resumen, guardar o cancelar el pedido
   /// y cerrar la mesa si se está editando un pedido existente.
