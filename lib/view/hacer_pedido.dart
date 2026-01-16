@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:t4_1/model/producto.dart';
+import 'package:t4_1/components/widgets/bottom_action_bar.dart';
+import 'package:t4_1/components/widgets/product_list_item.dart';
 import 'package:t4_1/model/pedido.dart';
+import 'package:t4_1/model/producto.dart';
+import 'package:t4_1/ui/app_theme.dart';
 import 'package:t4_1/view/seleccion_productos.dart';
 import 'package:t4_1/viewModel/pedido_view_model.dart';
-import 'package:t4_1/ui/app_theme.dart';
-import 'package:t4_1/components/widgets/product_list_item.dart';
-import 'package:t4_1/components/widgets/bottom_action_bar.dart';
 
+/// Pantalla para crear o editar un pedido.
+/// 
+/// Permite seleccionar productos, ajustar cantidades y ver el total provisional.
+/// También permite cerrar la mesa asociada al pedido. A través de un botón de "Cerrar mesa",
+/// el cuál solo aparece si se está editando un pedido existente.
+/// Incluye validaciones para asegurar que se ha especificado una mesa y se han añadido productos antes de guardar.
+/// También maneja la eliminación de productos y la actualización de cantidades.
+/// Utiliza SnackBars para notificar al usuario sobre acciones importantes.
+/// Permite cancelar la creación/edición del pedido.
+/// El diseño incluye un logo de fondo y una barra de acciones en la parte inferior.
 class HacerPedido extends StatefulWidget {
   final Pedido? pedido;
 
@@ -16,6 +26,7 @@ class HacerPedido extends StatefulWidget {
   State<HacerPedido> createState() => _HacerPedidoState();
 }
 
+/// Estado de la pantalla HacerPedido.
 class _HacerPedidoState extends State<HacerPedido> {
   final PedidoViewModel _viewModel = PedidoViewModel();
   final TextEditingController _mesaController = TextEditingController();
@@ -35,16 +46,23 @@ class _HacerPedidoState extends State<HacerPedido> {
     }
   }
 
+  /// Libera los recursos del controlador de texto al desechar el estado.
   @override
   void dispose() {
     _mesaController.dispose();
     super.dispose();
   }
 
+  /// Navega a la pantalla de selección de productos y actualiza la lista de productos seleccionados al regresar.
+  /// Valida que el estado del widget aún está montado antes de actualizar.
   Future<void> _irASeleccionarProductos() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SeleccionProductos(initialSelected: _viewModel.productosSeleccionados)),
+      MaterialPageRoute(
+        builder: (context) => SeleccionProductos(
+          initialSelected: _viewModel.productosSeleccionados,
+        ),
+      ),
     );
 
     if (!mounted) return;
@@ -54,9 +72,13 @@ class _HacerPedidoState extends State<HacerPedido> {
     }
   }
 
+  /// Elimina un producto de la lista de productos seleccionados y muestra un SnackBar notificando al usuario.
   void _eliminarProducto(String id) {
     final nueva = List<Producto>.from(_viewModel.productosSeleccionados);
-    final prod = nueva.firstWhere((p) => p.id == id, orElse: () => Producto(id: '', nombre: '', precio: 0));
+    final prod = nueva.firstWhere(
+      (p) => p.id == id,
+      orElse: () => Producto(id: '', nombre: '', precio: 0),
+    );
     nueva.removeWhere((p) => p.id == id);
     _viewModel.actualizarProductos(nueva);
     if (mounted && prod.id.isNotEmpty) {
@@ -69,6 +91,9 @@ class _HacerPedidoState extends State<HacerPedido> {
     }
   }
 
+  /// Decrementa la cantidad de un producto seleccionado. Si la cantidad llega a cero, elimina el producto de la lista.
+  /// Actualiza la lista de productos seleccionados y muestra un SnackBar si el producto es eliminado.
+  /// Valida que el estado del widget aún está montado antes de mostrar el SnackBar.
   void _decrementarProducto(String id) {
     final idx = _viewModel.productosSeleccionados.indexWhere((p) => p.id == id);
     if (idx == -1) return;
@@ -91,6 +116,7 @@ class _HacerPedidoState extends State<HacerPedido> {
     _viewModel.actualizarProductos(nueva);
   }
 
+  /// Incrementa la cantidad de un producto seleccionado y actualiza la lista de productos seleccionados.
   void _incrementarProducto(String id) {
     final idx = _viewModel.productosSeleccionados.indexWhere((p) => p.id == id);
     if (idx == -1) return;
@@ -101,6 +127,7 @@ class _HacerPedidoState extends State<HacerPedido> {
     _viewModel.actualizarProductos(nueva);
   }
 
+  /// Navega a la pantalla de resumen del pedido actual.
   Future<void> _verResumen() async {
     await Navigator.pushNamed(
       context,
@@ -110,11 +137,16 @@ class _HacerPedidoState extends State<HacerPedido> {
     if (!mounted) return;
   }
 
-
+  /// Construye la interfaz de usuario de la pantalla HacerPedido.
+  /// Incluye un campo de texto para la mesa, una lista de productos seleccionados,
+  /// un total provisional y botones para añadir productos, ver el resumen, guardar o cancelar el pedido
+  /// y cerrar la mesa si se está editando un pedido existente.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.pedido != null ? 'Editar Pedido' : 'Nuevo Pedido')),
+      appBar: AppBar(
+        title: Text(widget.pedido != null ? 'Editar Pedido' : 'Nuevo Pedido'),
+      ),
       body: Stack(
         children: [
           AppTheme.backgroundLogo(),
@@ -137,7 +169,7 @@ class _HacerPedidoState extends State<HacerPedido> {
                   Expanded(
                     child: _viewModel.productosSeleccionados.isEmpty
                         ? const Align(
-                          alignment: Alignment(0, -1),
+                            alignment: Alignment(0, -1),
                             child: Text(
                               "Ningún producto seleccionado",
                               style: TextStyle(
@@ -150,12 +182,15 @@ class _HacerPedidoState extends State<HacerPedido> {
                         : ListView.builder(
                             itemCount: _viewModel.productosSeleccionados.length,
                             itemBuilder: (context, index) {
-                              final prod = _viewModel.productosSeleccionados[index];
+                              final prod =
+                                  _viewModel.productosSeleccionados[index];
                               return ProductListItem(
                                 producto: prod,
                                 cantidad: prod.cantidad,
-                                onIncrement: () => _incrementarProducto(prod.id),
-                                onDecrement: () => _decrementarProducto(prod.id),
+                                onIncrement: () =>
+                                    _incrementarProducto(prod.id),
+                                onDecrement: () =>
+                                    _decrementarProducto(prod.id),
                                 onDelete: () => _eliminarProducto(prod.id),
                               );
                             },
@@ -169,10 +204,16 @@ class _HacerPedidoState extends State<HacerPedido> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("TOTAL PROVISIONAL:", style: TextStyle(fontSize: 16)),
+                            const Text(
+                              "TOTAL PROVISIONAL:",
+                              style: TextStyle(fontSize: 16),
+                            ),
                             Text(
                               "${_viewModel.total.toStringAsFixed(2)} €",
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -183,17 +224,20 @@ class _HacerPedidoState extends State<HacerPedido> {
                             SizedBox(
                               width: 150,
                               child: OutlinedButton(
-                                  style: AppTheme.actionOutlined(),
-                                  onPressed: _irASeleccionarProductos,
-                                  child: const Text("Añadir Productos"),
-                                ),
+                                style: AppTheme.actionOutlined(),
+                                onPressed: _irASeleccionarProductos,
+                                child: const Text("Añadir Productos"),
+                              ),
                             ),
                             const SizedBox(width: 8),
                             SizedBox(
                               width: 150,
                               child: ElevatedButton(
                                 style: AppTheme.confirmButton(Colors.orange),
-                                onPressed: _viewModel.productosSeleccionados.isNotEmpty ? _verResumen : null,
+                                onPressed:
+                                    _viewModel.productosSeleccionados.isNotEmpty
+                                    ? _verResumen
+                                    : null,
                                 child: const Text("Ver Resumen"),
                               ),
                             ),
@@ -201,7 +245,7 @@ class _HacerPedidoState extends State<HacerPedido> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               );
             },
@@ -210,18 +254,25 @@ class _HacerPedidoState extends State<HacerPedido> {
       ),
       bottomNavigationBar: BottomActionBar(
         children: [
+
+          /// Valida si se está editando un pedido existente para mostrar el botón de cerrar mesa.
           if (widget.pedido != null) ...[
             SizedBox(
               width: 120,
               child: TextButton(
-                style: AppTheme.smallTextButton(bg: Colors.red, fg: Colors.white),
+                style: AppTheme.smallTextButton(
+                  bg: Colors.red,
+                  fg: Colors.white,
+                ),
                 onPressed: () async {
                   final navigator = Navigator.of(context);
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Cerrar mesa'),
-                      content: const Text('¿Cerrar la mesa y eliminar el pedido?'),
+                      content: const Text(
+                        '¿Cerrar la mesa y eliminar el pedido?',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -229,14 +280,22 @@ class _HacerPedidoState extends State<HacerPedido> {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Cerrar', style: TextStyle(color: Colors.red)),
+                          child: const Text(
+                            'Cerrar',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                     ),
                   );
 
+                  /// Si el usuario confirma, navega de regreso a la pantalla anterior con la acción de cerrar mesa.
                   if (confirm == true) {
-                    navigator.pop({'action': 'close', 'mesa': widget.pedido!.mesa, 'id': widget.pedido!.id});
+                    navigator.pop({
+                      'action': 'close',
+                      'mesa': widget.pedido!.mesa,
+                      'id': widget.pedido!.id,
+                    });
                   }
                 },
                 child: const Text('Cerrar mesa'),
@@ -248,8 +307,11 @@ class _HacerPedidoState extends State<HacerPedido> {
             width: 120,
             child: TextButton(
               style: AppTheme.smallTextButton(),
-              onPressed: () => Navigator.pop(context), 
-              child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -266,11 +328,17 @@ class _HacerPedidoState extends State<HacerPedido> {
     );
   }
 
+  /// Guarda el pedido actual si la mesa y los productos son válidos.
+  /// Muestra un SnackBar si faltan datos obligatorios.
+  /// Navega de regreso a la pantalla anterior con el pedido generado.
   void _guardarPedido() {
     final pedido = _viewModel.generarPedido();
     if ((pedido.mesa.isEmpty) || _viewModel.productosSeleccionados.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rellena la mesa y añade productos antes de guardar'), duration: Duration(seconds: 1)),
+        const SnackBar(
+          content: Text('Rellena la mesa y añade productos antes de guardar'),
+          duration: Duration(seconds: 1),
+        ),
       );
       return;
     }

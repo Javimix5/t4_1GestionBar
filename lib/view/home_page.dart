@@ -4,6 +4,12 @@ import 'package:t4_1/ui/app_theme.dart';
 import 'package:t4_1/viewModel/home_view_model.dart';
 import 'package:t4_1/view/hacer_pedido.dart' as crear_pedido;
 
+/// Página principal que muestra la lista de pedidos activos.
+/// 
+/// Permite crear nuevos pedidos, editar existentes y cerrar mesas.
+/// Utiliza un ViewModel para gestionar el estado de los pedidos.
+/// También maneja la navegación hacia la página de creación/edición de pedidos.
+/// Incluye confirmaciones para cerrar mesas y notificaciones mediante SnackBars.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -22,12 +28,13 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
+    /// Valida el resultado de la navegación y actualiza el estado de los pedidos en consecuencia.
     if (!mounted) return;
 
     if (result is Map && result['action'] == 'close') {
       final id = result['id'] as String?;
       final mesa = result['mesa'] as String?;
-        if (id != null) {
+      if (id != null) {
         _viewModel.eliminarPedidoById(id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -41,6 +48,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    /// Valida y maneja la adición o actualización de un pedido.
     if (result is Pedido) {
       final normalizedNew = result.mesa.trim().toLowerCase();
       final dupIdx = _viewModel.pedidos.indexWhere(
@@ -58,6 +66,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
+      /// Actualiza o agrega el pedido según corresponda.
       final existingIdx = _viewModel.pedidos.indexWhere(
         (p) => p.id == result.id,
       );
@@ -69,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Construye la interfaz de usuario principal con la lista de pedidos y las acciones asociadas.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,14 +95,16 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     "No hay pedidos activos",
                     style: TextStyle(
-                      fontSize: 20, 
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color:
-                          Colors.black54, 
+                      color: Colors.black54,
                     ),
                   ),
                 );
               }
+
+              /// Construye la lista de pedidos activos.
+              /// Cada pedido muestra detalles y opciones para editar o cerrar la mesa.
               return ListView.builder(
                 itemCount: _viewModel.pedidos.length,
                 itemBuilder: (context, index) {
@@ -113,9 +125,16 @@ class _HomePageState extends State<HomePage> {
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Center(
-                              child: Text("${pedido.numeroProductos}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Center(
+                                  child: Text(
+                                    "${pedido.numeroProductos}",
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                           ),
                         ),
                       ),
@@ -123,9 +142,7 @@ class _HomePageState extends State<HomePage> {
                         pedido.mesa,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(
-                        "${pedido.numeroProductos} productos"
-                      ),
+                      subtitle: Text("${pedido.numeroProductos} productos"),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -139,7 +156,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 12),
                           TextButton(
-                            style: AppTheme.smallTextButton(bg: Colors.red, fg: Colors.white),
+                            style: AppTheme.smallTextButton(
+                              bg: Colors.red,
+                              fg: Colors.white,
+                            ),
                             child: const Text('Cerrar'),
                             onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
@@ -167,16 +187,18 @@ class _HomePageState extends State<HomePage> {
                                   ],
                                 ),
                               );
+
+                              /// Si se confirma, elimina el pedido y muestra una notificación.
                               if (confirm == true) {
                                 _viewModel.eliminarPedidoById(pedido.id);
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Mesa "${pedido.mesa}" cerrada',
-                                          ),
-                                          duration: AppTheme.snackBarDuration,
-                                        ),
-                                      );
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Mesa "${pedido.mesa}" cerrada',
+                                    ),
+                                    duration: AppTheme.snackBarDuration,
+                                  ),
+                                );
                               }
                             },
                           ),
@@ -190,6 +212,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
+      /// Botón flotante para crear un nuevo pedido.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _irACrearPedido,
         label: const Text("Nuevo Pedido"),

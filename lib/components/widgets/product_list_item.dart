@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:t4_1/model/producto.dart';
 
+/// Widget que representa un elemento de lista para un producto, mostrando su
+/// nombre, precio, cantidad y botones para incrementar, decrementar o eliminar el producto.
+/// También puede mostrar el precio total basado en la cantidad seleccionada.
 class ProductListItem extends StatelessWidget {
   final Producto producto;
   final int cantidad;
@@ -31,6 +34,8 @@ class ProductListItem extends StatelessWidget {
             width: 48,
             height: 48,
             fit: BoxFit.cover,
+
+            /// Valida si la imagen existe, si no muestra un avatar con la inicial del producto.
             errorBuilder: (context, error, stackTrace) => CircleAvatar(child: Text(producto.nombre.isNotEmpty ? producto.nombre[0] : '?')),
           ),
         ),

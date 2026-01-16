@@ -1,3 +1,7 @@
+/// Modelo que representa un producto disponible en el bar.
+/// 
+/// Contiene un identificador, nombre, precio, cantidad disponible y una imagen opcional.
+/// También proporciona un método para crear una copia del producto.
 class Producto {
   final String id;
   final String nombre;
