@@ -30,6 +30,7 @@ class HacerPedido extends StatefulWidget {
 class _HacerPedidoState extends State<HacerPedido> {
   final PedidoViewModel _viewModel = PedidoViewModel();
   final TextEditingController _mesaController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -71,6 +72,14 @@ class _HacerPedidoState extends State<HacerPedido> {
 
     if (result is List<Producto>) {
       _viewModel.actualizarProductos(result);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Productos actualizados'),
+            duration: AppTheme.snackBarDuration,
+          ),
+        );
+      }
     }
   }
 
@@ -160,12 +169,27 @@ class _HacerPedidoState extends State<HacerPedido> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: TextField(
-                      controller: _mesaController,
-                      decoration: const InputDecoration(
-                        labelText: "Mesa / Identificador",
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.table_bar),
+                    child: Tooltip(
+                      message: 'Identificador de la mesa (ej: MESA12)',
+                      child: Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _mesaController,
+                          decoration: const InputDecoration(
+                            labelText: "Mesa / Identificador",
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.table_bar),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Introduce la mesa';
+                            }
+                            if (value.trim().length < 2) {
+                              return 'Identificador demasiado corto';
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -237,8 +261,7 @@ class _HacerPedidoState extends State<HacerPedido> {
                               width: 150,
                               child: ElevatedButton(
                                 style: AppTheme.confirmButton(Colors.orange),
-                                onPressed:
-                                    _viewModel.productosSeleccionados.isNotEmpty
+                                onPressed: _viewModel.productosSeleccionados.isNotEmpty
                                     ? _verResumen
                                     : null,
                                 child: const Text("Ver Resumen"),
@@ -255,8 +278,11 @@ class _HacerPedidoState extends State<HacerPedido> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomActionBar(
-        children: [
+      bottomNavigationBar: ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, _) {
+          return BottomActionBar(
+            children: [
 
           /// Valida si se está editando un pedido existente para mostrar el botón de cerrar mesa.
           if (widget.pedido != null) ...[
@@ -320,13 +346,25 @@ class _HacerPedidoState extends State<HacerPedido> {
           const SizedBox(width: 8),
           SizedBox(
             width: 140,
-            child: OutlinedButton(
-              style: AppTheme.actionOutlined(),
-              onPressed: _guardarPedido,
-              child: const Text("Guardar Pedido"),
-            ),
+            child: _viewModel.esValido()
+                ? OutlinedButton(
+                    style: AppTheme.actionOutlined(),
+                    onPressed: _guardarPedido,
+                    child: const Text("Guardar Pedido"),
+                  )
+                : Tooltip(
+                    message:
+                        'debes añadir la mesa/identificador para poder guardar el pedido.',
+                    child: OutlinedButton(
+                      style: AppTheme.actionOutlined(),
+                      onPressed: null,
+                      child: const Text("Guardar Pedido"),
+                    ),
+                  ),
           ),
         ],
+      );
+    },
       ),
     );
   }
@@ -335,17 +373,39 @@ class _HacerPedidoState extends State<HacerPedido> {
   /// Muestra un SnackBar si faltan datos obligatorios.
   /// Navega de regreso a la pantalla anterior con el pedido generado.
   void _guardarPedido() {
-    final pedido = _viewModel.generarPedido();
-    if ((pedido.mesa.isEmpty) || _viewModel.productosSeleccionados.isEmpty) {
+    if (!(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Rellena la mesa y añade productos antes de guardar'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text('Corrige los errores antes de guardar'),
+          duration: AppTheme.snackBarDuration,
         ),
       );
       return;
     }
 
-    Navigator.pop(context, pedido);
+    final pedido = _viewModel.generarPedido();
+    if ((pedido.mesa.isEmpty) || _viewModel.productosSeleccionados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Rellena la mesa y añade productos antes de guardar'),
+          duration: AppTheme.snackBarDuration,
+        ),
+      );
+      return;
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Pedido guardado'),
+          duration: AppTheme.snackBarDuration,
+        ),
+      );
+    }
+
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      Navigator.pop(context, pedido);
+    });
   }
 }

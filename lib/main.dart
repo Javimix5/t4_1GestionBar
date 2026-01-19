@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bar Vader',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.themeData(),
       home: const HomePage(),
       routes: {

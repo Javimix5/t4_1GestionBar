@@ -45,6 +45,7 @@ class ProductListItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              tooltip: 'Disminuir cantidad',
               icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
               iconSize: 20,
               padding: const EdgeInsets.all(6),
@@ -63,6 +64,7 @@ class ProductListItem extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             IconButton(
+              tooltip: 'Aumentar cantidad',
               icon: const Icon(Icons.add_circle, color: Colors.green),
               iconSize: 20,
               padding: const EdgeInsets.all(6),
@@ -74,6 +76,7 @@ class ProductListItem extends StatelessWidget {
             if (onDelete != null) ...[
               const SizedBox(width: 6),
               IconButton(
+                tooltip: 'Eliminar producto',
                 icon: const Icon(Icons.delete, color: Colors.red),
                 iconSize: 20,
                 padding: const EdgeInsets.all(6),
