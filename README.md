@@ -1,5 +1,7 @@
 # t4_1 — GestionBar (Gestión de pedidos - Flutter)
 
+<p align="center"><img width="399" height="549" alt="Captura de pantalla 2026-01-19 183447" src="https://github.com/user-attachments/assets/cea860ec-3d8e-4b8e-8c53-22859110eb50" /></p>
+
 Descripción
 -----------
 
