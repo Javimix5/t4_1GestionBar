@@ -130,6 +130,7 @@ Widget build(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
+            tooltip: &#39;Disminuir cantidad&#39;,
             icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
             iconSize: 20,
             padding: const EdgeInsets.all(6),
@@ -148,6 +149,7 @@ Widget build(BuildContext context) {
           ),
           const SizedBox(width: 6),
           IconButton(
+            tooltip: &#39;Aumentar cantidad&#39;,
             icon: const Icon(Icons.add_circle, color: Colors.green),
             iconSize: 20,
             padding: const EdgeInsets.all(6),
@@ -159,6 +161,7 @@ Widget build(BuildContext context) {
           if (onDelete != null) ...[
             const SizedBox(width: 6),
             IconButton(
+              tooltip: &#39;Eliminar producto&#39;,
               icon: const Icon(Icons.delete, color: Colors.red),
               iconSize: 20,
               padding: const EdgeInsets.all(6),

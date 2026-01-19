@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:t4_1/model/pedido.dart';
 import 'package:t4_1/model/producto.dart';
 
+/// ViewModel para la página de inicio.
 class HomeViewModel extends ChangeNotifier {
   List<Pedido> pedidos = [];
 
@@ -9,6 +10,7 @@ class HomeViewModel extends ChangeNotifier {
     _cargarDatosIniciales();
   }
 
+/// Carga datos iniciales de ejemplo para los pedidos.
   void _cargarDatosIniciales() {
     pedidos = [
       Pedido(
@@ -31,11 +33,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+/// Agrega un nuevo pedido a la lista y notifica a los oyentes.
   void agregarPedido(Pedido pedido) {
     pedidos.add(pedido);
     notifyListeners();
   }
 
+/// Actualiza un pedido existente identificado por su ID y notifica a los oyentes.
   void actualizarPedidoById(String id, Pedido pedido) {
     final idx = pedidos.indexWhere((p) => p.id == id);
     if (idx != -1) {
@@ -44,6 +48,7 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
+/// Elimina un pedido de la lista por su ID y notifica a los oyentes.
   void eliminarPedidoById(String id) {
     final idx = pedidos.indexWhere((p) => p.id == id);
     if (idx != -1) {

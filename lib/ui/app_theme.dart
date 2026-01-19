@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Clase que define el tema de la aplicación, incluyendo estilos para botones,
 /// colores primarios y un widget de logo de fondo reutilizable.
-/// También proporciona duraciones estándar para SnackBars. Está configurada para ser 
+/// 
+/// Pproporciona duraciones estándar para SnackBars. Está configurada para ser 
 /// breve, mejorando la experiencia del usuario.
+/// 
 /// Además, incluye un widget para mostrar un logo de fondo con opacidad ajustable.
 class AppTheme {
   static ThemeData themeData() {

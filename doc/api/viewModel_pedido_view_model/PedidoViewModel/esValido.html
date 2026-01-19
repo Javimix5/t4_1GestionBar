@@ -61,14 +61,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Verifica si el pedido es válido (mesa no vacía y al menos un producto seleccionado).</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">bool esValido() {
-  return mesa.isNotEmpty &amp;&amp; productosSeleccionados.isNotEmpty;
-}</code></pre>
+    return mesa.isNotEmpty &amp;&amp; productosSeleccionados.isNotEmpty;
+  }</code></pre>
 </section>
 
 

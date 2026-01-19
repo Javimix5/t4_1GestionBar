@@ -7,7 +7,7 @@ import 'package:t4_1/components/widgets/bottom_action_bar.dart';
 /// Página para seleccionar productos de la carta.
 /// 
 /// Permite incrementar o decrementar la cantidad de cada producto.
-/// Al confirmar, devuelve la lista de productos seleccionados con sus cantidades.
+/// 
 /// Utiliza un widget de lista personalizado para mostrar los productos y un
 /// barra de acciones en la parte inferior para confirmar o cancelar la selección.
 class SeleccionProductos extends StatefulWidget {
@@ -68,6 +68,7 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
 
   final Map<int, int> _cantidades = {};
 
+/// Inicializa el estado, cargando las cantidades iniciales si se proporcionan.
   @override
   void initState() {
     super.initState();
@@ -111,6 +112,7 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
     Navigator.pop(context, seleccionados);
   }
 
+/// Construye la interfaz de usuario de la página.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,6 +136,8 @@ class _SeleccionProductosState extends State<SeleccionProductos> {
           ),
         ],
       ),
+
+      /// Barra de acciones en la parte inferior con botones para cancelar o confirmar.
       bottomNavigationBar: BottomActionBar(
         children: [
           SizedBox(

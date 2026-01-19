@@ -62,15 +62,18 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Actualiza la lista de productos seleccionados y notifica a los oyentes.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void actualizarProductos(List&lt;Producto&gt; nuevosProductos) {
-  productosSeleccionados = nuevosProductos;
-  notifyListeners();
-}</code></pre>
+    productosSeleccionados = nuevosProductos;
+    notifyListeners();
+  }</code></pre>
 </section>
 
 

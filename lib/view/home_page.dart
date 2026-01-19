@@ -20,6 +20,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final HomeViewModel _viewModel = HomeViewModel();
 
+/// Navega a la página de creación/edición de pedidos.
   Future<void> _irACrearPedido([Pedido? pedido]) async {
     final result = await Navigator.push(
       context,
@@ -89,6 +90,8 @@ class _HomePageState extends State<HomePage> {
           ListenableBuilder(
             listenable: _viewModel,
             builder: (context, child) {
+
+              /// Muestra un mensaje si no hay pedidos activos.
               if (_viewModel.pedidos.isEmpty) {
                 return const Align(
                   alignment: Alignment(0, -0.8),

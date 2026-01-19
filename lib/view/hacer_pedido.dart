@@ -9,14 +9,7 @@ import 'package:t4_1/viewModel/pedido_view_model.dart';
 
 /// Pantalla para crear o editar un pedido.
 /// 
-/// Permite seleccionar productos, ajustar cantidades y ver el total provisional.
-/// También permite cerrar la mesa asociada al pedido. A través de un botón de "Cerrar mesa",
-/// el cuál solo aparece si se está editando un pedido existente.
-/// Incluye validaciones para asegurar que se ha especificado una mesa y se han añadido productos antes de guardar.
-/// También maneja la eliminación de productos y la actualización de cantidades.
-/// Utiliza SnackBars para notificar al usuario sobre acciones importantes.
-/// Permite cancelar la creación/edición del pedido.
-/// El diseño incluye un logo de fondo y una barra de acciones en la parte inferior.
+/// Permite seleccionar productos, especificar la mesa y ver un resumen antes de guardar el pedido.
 class HacerPedido extends StatefulWidget {
   final Pedido? pedido;
 
@@ -352,6 +345,8 @@ class _HacerPedidoState extends State<HacerPedido> {
                     onPressed: _guardarPedido,
                     child: const Text("Guardar Pedido"),
                   )
+
+                  /// Muestra un botón deshabilitado con tooltip si el pedido no es válido.
                 : Tooltip(
                     message:
                         'debes añadir la mesa/identificador para poder guardar el pedido.',

@@ -61,15 +61,18 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Genera un objeto Pedido basado en el estado actual del ViewModel.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Pedido generarPedido() {
-  final idToUse = id ?? DateTime.now().millisecondsSinceEpoch.toString();
-  return Pedido(id: idToUse, mesa: mesa, productos: productosSeleccionados);
-}</code></pre>
+    final idToUse = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    return Pedido(id: idToUse, mesa: mesa, productos: productosSeleccionados);
+  }</code></pre>
 </section>
 
 
