@@ -26,40 +26,173 @@ Portada
 
 ---
 
-## Explicación de la aplicación
+## **Explicación de la aplicación**
 
-Bar Vader es una aplicación para gestionar pedidos en un bar/mesa desde un dispositivo móvil o tableta. Permite seleccionar productos, ajustar cantidades, ver el resumen y guardar el pedido asociado a una mesa.
+### **Descripción general**
 
-A continuación se describen las acciones más importantes.
+**Bar Vader** es una aplicación móvil desarrollada en Flutter para gestionar pedidos en un bar o restaurante desde dispositivos móviles o tabletas. La aplicación permite: 
 
-### Seleccionar y añadir productos
+✅ Gestionar múltiples mesas simultáneamente  
+✅ Seleccionar productos de un catálogo predefinido  
+✅ Ajustar cantidades de productos en tiempo real  
+✅ Calcular el total provisional automáticamente  
+✅ Ver un resumen detallado antes de guardar  
+✅ Editar pedidos existentes  
+✅ Cerrar mesas al finalizar el servicio  
 
-- Pulsa en "Añadir Productos" para ir a la pantalla de selección. Allí puedes marcar los productos que quieres incluir en el pedido.
-- Al regresar, los productos seleccionados aparecen en la lista del pedido.
-- Al añadir o actualizar la selección, la app muestra un breve aviso (SnackBar) confirmando la acción.
+La aplicación sigue una arquitectura MVVM (Model-View-ViewModel) que separa la lógica de negocio de la interfaz de usuario, garantizando un código limpio y mantenible. 
 
-### Ajustar cantidades
+---
 
-- En la lista del pedido usa los botones + y - para aumentar o disminuir la cantidad de cada producto.
-- Si la cantidad baja a 0 el producto se elimina de la lista y se muestra un SnackBar indicando la eliminación.
-- Los cambios actualizan el total provisional en la parte inferior.
+### **Pantalla principal: Lista de pedidos**
 
-### Ver resumen y total provisional
+Al abrir la aplicación, se muestra la **pantalla principal** con:
 
-- El total provisional se muestra siempre en la parte inferior con formato numérico.
-- Puedes pulsar "Ver Resumen" para ver un detalle del pedido antes de guardar.
+- **Lista de pedidos activos**: Cada pedido muestra: 
+  - El identificador de la mesa
+  - Número de productos en el pedido
+  - Total acumulado en euros
+  - Botón "Cerrar" para finalizar la mesa
+  
+- **Botón flotante "Nuevo Pedido"**: En la esquina inferior derecha, permite crear un nuevo pedido. 
 
-### Guardar pedido y validaciones
+Si no hay pedidos activos, aparece el mensaje: _"No hay pedidos activos"_. 
 
-- Para guardar un pedido debes indicar un identificador de mesa (campo "Mesa / Identificador") y añadir al menos un producto.
-- El campo de mesa tiene validaciones: no puede estar vacío y debe tener al menos 2 caracteres.
-- Si intentas guardar sin completar los campos obligatorios, la app mostrará mensajes de validación (debajo del campo) y un SnackBar explicando el error.
-- Cuando el pedido se guarda correctamente verás un SnackBar de confirmación y, tras una breve espera, la pantalla vuelve a la anterior transmitiendo el pedido generado.
+**Acciones disponibles:**
+- **Pulsar sobre un pedido**: Abre la pantalla de edición del pedido. 
+- **Botón "Cerrar"**:  Solicita confirmación y cierra la mesa eliminando el pedido. 
+- **Botón "Nuevo Pedido"**: Crea un nuevo pedido vacío. 
 
-### Cerrar mesa
+---
 
-- Si estás editando un pedido existente aparece la opción "Cerrar mesa".
-- Al seleccionar "Cerrar mesa" se pide confirmación. Confirmar elimina el pedido asociado a la mesa y notifica la acción a la pantalla anterior.
+### **Crear un nuevo pedido**
+
+Para crear un nuevo pedido: 
+
+1. Pulsa el botón **"Nuevo Pedido"** en la pantalla principal. 
+2. Se abre la pantalla de creación con:
+   - Campo de texto **"Mesa / Identificador"** (obligatorio)
+   - Lista vacía de productos
+   - Total provisional:  **0.00 €**
+3. Introduce el identificador de la mesa (ej: "MESA12", "Terraza 3").
+4. Pulsa **"Añadir Productos"** para seleccionar artículos del catálogo. 
+
+---
+
+### **Seleccionar y añadir productos**
+
+Para añadir productos a un pedido: 
+
+1. Pulsa en **"Añadir Productos"** desde la pantalla de creación/edición.
+2. Se abre la pantalla de selección mostrando el catálogo completo.
+3. Marca los productos que deseas incluir usando los checkboxes.
+4. Pulsa el botón de confirmación para regresar. 
+5. Los productos seleccionados aparecen en la lista del pedido. 
+6. Un **SnackBar** confirma:  _"Productos actualizados"_.
+
+**Nota**: Si regresas sin seleccionar productos, la lista no se modifica.
+
+---
+
+### **Ajustar cantidades de productos**
+
+Cada producto en la lista del pedido incluye controles para ajustar su cantidad:
+
+- **Botón "+"**: Incrementa la cantidad en 1 unidad.
+- **Botón "-"**: Disminuye la cantidad en 1 unidad.
+- **Botón de papelera (🗑️)**: Elimina el producto directamente.
+
+**Comportamiento importante:**
+- Si reduces la cantidad a **0** usando el botón "-", el producto se elimina automáticamente.
+- Al eliminar un producto aparece un SnackBar: _"Producto [nombre] eliminado"_.
+- El **total provisional** se actualiza automáticamente tras cada cambio.
+
+---
+### **Ver resumen del pedido**
+
+Antes de guardar, puedes revisar el pedido completo:
+
+1. Pulsa **"Ver Resumen"** en la parte inferior de la pantalla.
+2. Se abre una nueva pantalla mostrando:
+   - Identificador de la mesa
+   - Nombre del bar:  **"Bar Vader"**
+   - Eslogan: _"Únete al Lado Oscuro.....tenemos Happy Hour"_
+   - Lista detallada de productos con cantidades y subtotales
+   - **TOTAL A PAGAR** en euros
+3. Pulsa **"Volver a edición"** para regresar y hacer cambios.
+
+**Nota**: El botón "Ver Resumen" solo está habilitado si hay al menos un producto en el pedido.
+
+---
+
+### **Guardar pedido y validaciones**
+
+Para guardar un pedido, debes cumplir estos requisitos: 
+
+✔️ **Identificador de mesa**: No puede estar vacío y debe tener al menos **2 caracteres**.  
+✔️ **Al menos un producto**: Debe haber productos en la lista. 
+
+**Proceso de guardado:**
+
+1. Completa el campo **"Mesa / Identificador"**. 
+2. Añade al menos un producto. 
+3. Pulsa **"Guardar Pedido"**. 
+4. Si hay errores de validación: 
+   - Aparece un mensaje debajo del campo (ej: _"Introduce la mesa"_)
+   - Un SnackBar explica el error:  _"Corrige los errores antes de guardar"_
+5. Si todo es correcto: 
+   - Aparece un SnackBar: _"Pedido guardado"_
+   - Tras 0.7 segundos, regresas a la pantalla principal
+   - El pedido aparece en la lista de pedidos activos
+
+**Validaciones específicas:**
+- Mesa vacía → _"Introduce la mesa"_
+- Mesa con menos de 2 caracteres → _"Identificador demasiado corto"_
+- Sin productos → _"Rellena la mesa y añade productos antes de guardar"_
+- Mesa duplicada → _"Ya existe una mesa con ese nombre o número"_
+
+---
+
+<div style="page-break-after: always;"></div>
+
+### **Editar un pedido existente**
+
+Para modificar un pedido ya creado:
+
+1. En la pantalla principal, pulsa sobre el pedido que deseas editar.
+2. Se abre la pantalla de edición con:
+   - Título: **"Editar Pedido"**
+   - Campo de mesa prellenado
+   - Lista de productos actual
+   - Botón adicional: **"Cerrar mesa"** (color rojo)
+3. Modifica el identificador de la mesa si es necesario.
+4. Añade, elimina o ajusta cantidades de productos. 
+5. Pulsa **"Guardar Pedido"** para confirmar los cambios.
+
+**Diferencia con crear pedido:**
+- Al editar aparece el botón "Cerrar mesa" en la barra inferior.
+- Los datos se precargan con la información del pedido existente.
+
+---
+
+### **Cerrar mesa**
+
+Existen **dos formas** de cerrar una mesa:
+
+#### **Opción 1: Desde la pantalla principal**
+1. Pulsa el botón **"Cerrar"** junto al pedido.
+2. Aparece un diálogo de confirmación:  _"¿Confirmar cierre de la mesa [nombre]?"_
+3. Pulsa **"Cerrar"** para confirmar o **"Cancelar"** para abortar. 
+4. Si confirmas, el pedido se elimina y aparece un SnackBar:  _"Mesa [nombre] cerrada"_. 
+
+#### **Opción 2: Desde la pantalla de edición**
+1. Abre el pedido y pulsa **"Cerrar mesa"** en la barra inferior. 
+2. Aparece un diálogo:  _"¿Cerrar la mesa y eliminar el pedido?"_
+3. Pulsa **"Cerrar"** para confirmar. 
+4. Regresas a la pantalla principal y el pedido desaparece de la lista. 
+5. Aparece un SnackBar: _"Mesa [nombre] cerrada"_.
+
+**⚠️ Importante**:  Cerrar una mesa elimina el pedido permanentemente y no se puede deshacer.
 
 ---
 
