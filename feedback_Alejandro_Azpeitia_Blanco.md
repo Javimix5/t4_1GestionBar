@@ -3,8 +3,6 @@
 **Proyecto:** BarApp  
 **Repositorio:** BarApp  
 **Wiki:** https://github.com/Aldair-GL/BarApp/wiki  
-**Evaluador:** (Tu nombre)  
-**Fecha:** (Fecha de entrega)
 
 ---
 
