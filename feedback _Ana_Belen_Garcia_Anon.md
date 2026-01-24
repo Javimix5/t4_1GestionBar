@@ -3,8 +3,6 @@
 **Proyecto:** La Posada de los Muertos  
 **Repositorio:** LaPosadaDeLosMuertos  
 **Wiki:** https://github.com/Anabgar3105/LaPosadaDeLosMuertos/wiki  
-**Evaluador:** (Tu nombre)  
-**Fecha:** (Fecha de entrega)
 
 ---
 
