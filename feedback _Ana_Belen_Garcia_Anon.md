@@ -68,7 +68,6 @@ Correcto a nivel funcional, pero la documentación puede reforzarse con evidenci
 - El índice facilita la navegación entre las distintas secciones.
 
 **Aspectos a mejorar:**
-- Es importante comprobar que la portada incluya todos los datos obligatorios: versión, fecha, desarrollado por y contacto.
 - La explicación de la aplicación podría detallarse más con pasos concretos y ejemplos de uso.
 - Las preguntas frecuentes podrían ampliarse con problemas comunes reales que pueda encontrar el usuario.
 
@@ -84,8 +83,6 @@ Buena estructura general, pero el contenido necesita más detalle y orientación
 
 **Aspectos a mejorar:**
 - La guía debería detallar paso a paso cómo desplegar la aplicación en las distintas plataformas.
-- Sería recomendable incluir requisitos previos, comandos necesarios y posibles errores comunes.
-- Añadir enlaces a documentación oficial o recursos externos mejoraría mucho esta sección.
 
 **Valoración:**  
 Correcta en concepto, pero requiere mayor profundidad técnica.
