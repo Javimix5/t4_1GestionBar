@@ -3,8 +3,6 @@
 **Proyecto:** Interfaces_Navigation_Bar_Menu  
 **Repositorio:** Interfaces_Navigation_Bar_Menu  
 **Wiki:** https://github.com/Nando5P/Interfaces_Navigation_Bar_Menu/wiki  
-**Evaluador:** (Tu nombre)  
-**Fecha:** (Fecha de entrega)
 
 ---
 
