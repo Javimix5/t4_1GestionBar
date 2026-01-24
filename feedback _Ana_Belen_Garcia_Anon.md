@@ -35,7 +35,7 @@ Buen punto de partida, cumple los requisitos básicos y está bien organizado.
 ## Punto 2. Comentarios en el código y documentación API
 
 **Aspectos positivos:**
-- Se presupone el uso de comentarios en clases y métodos, siguiendo las indicaciones del ejercicio.
+- El uso de comentarios en clases y métodos, siguiendo las indicaciones del ejercicio ha sido el correcto.
 - La generación de la documentación con `dart doc` es un punto clave y bien orientado a la documentación técnica.
 
 **Aspectos a mejorar:**
@@ -50,7 +50,7 @@ Buen enfoque técnico, pero se echa en falta mayor visibilidad de la documentaci
 ## Punto 3. Tooltips, validaciones y snackbars
 
 **Aspectos positivos:**
-- Se entiende que la aplicación incluye estos elementos para mejorar la experiencia de usuario.
+- La aplicación incluye diferentes tooltips, snackbar y validaciones para mejorar la experiencia de usuario.
 
 **Aspectos a mejorar:**
 - La wiki podría incluir capturas de pantalla o una breve explicación visual de dónde aparecen los tooltips, validaciones y snackbars.
